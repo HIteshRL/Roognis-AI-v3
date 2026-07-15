@@ -357,6 +357,49 @@
       gap: 7px;
     }
 
+    .portal-links {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 6px;
+    }
+
+    .portal-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      padding: 7px 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+    }
+
+    .portal-link em {
+      font-style: normal;
+      font-size: 10px;
+      font-weight: 500;
+      opacity: 0.7;
+    }
+
+    a.portal-link:hover {
+      border-color: var(--green);
+      color: var(--ink);
+      background: var(--surface-2);
+    }
+
+    .portal-link.active {
+      border-color: transparent;
+      background: var(--grad-accent);
+      color: #fff;
+      cursor: default;
+    }
+
     .demo-hint {
       margin-top: 18px;
       padding: 12px;
@@ -1580,6 +1623,13 @@
       }
     }
   </style>
+
+  <!-- Rewritten per-process by frontend/server.js from PORTAL_ROLE and the
+       STUDENT_PORT / TEACHER_PORT / PARENT_PORT env vars. The values below are
+       the defaults, so opening this file straight from disk still works. -->
+  <script id="portal-config" type="application/json">
+{"role":"student","ports":{"student":3000,"teacher":3001,"parent":3002}}
+  </script>
 </head>
 <body>
   <!-- Auth removed: no sign-in screen. The app boots straight into the workspace. -->
@@ -1601,15 +1651,12 @@
           <strong id="context-title">Learning</strong>
           <p id="context-copy">AI tutor flows are active first.</p>
         </div>
-        <!-- Auth removed: signing in used to decide the role. This switcher
-             replaces it so the teacher and parent portals stay reachable. -->
+        <!-- Each portal is its own process on its own port, so the role is fixed
+             here and these links just hop to the sibling ports. Built at runtime
+             from the injected port map. -->
         <div class="field-group">
-          <label for="role-switch">Demo role</label>
-          <select class="field" id="role-switch">
-            <option value="student">Student</option>
-            <option value="teacher">Teacher</option>
-            <option value="parent">Parent</option>
-          </select>
+          <label>Demo portals</label>
+          <div class="portal-links" id="portal-links"></div>
         </div>
       </div>
     </aside>
@@ -2310,17 +2357,34 @@
       'parent-mvp': ['Parent Progress', 'Linked child summary from analytics'],
     };
 
-    // Auth removed: these are display-only personas for the role switcher, not
-    // accounts. userId matches the demo roster in services/analytics.
+    // Auth removed: these are display-only personas, not accounts. userId matches
+    // the demo roster in services/analytics.
     const demoUsers = {
       student: { role: 'student', name: 'Arjun Sharma', initials: 'AS', userId: '00000000-0000-0000-0000-000000000002' },
       teacher: { role: 'teacher', name: 'Demo Teacher', initials: 'DT', userId: '00000000-0000-0000-0000-000000000003' },
       parent: { role: 'parent', name: 'Demo Parent', initials: 'DP', userId: null },
     };
 
+    // Injected by frontend/server.js. Falls back to the student portal if this
+    // page is opened without a server to rewrite the block.
+    const portalConfig = (() => {
+      const fallback = { role: 'student', ports: { student: 3000, teacher: 3001, parent: 3002 } };
+      try {
+        const parsed = JSON.parse(document.querySelector('#portal-config').textContent);
+        return demoUsers[parsed.role] ? parsed : fallback;
+      } catch (error) {
+        console.warn('[portal] config block unreadable, defaulting to student', error);
+        return fallback;
+      }
+    })();
+
+    const PORTAL_ROLE = portalConfig.role;
+    const PORTAL_ROLES = ['student', 'teacher', 'parent'];
+    const PORTAL_NAMES = { student: 'Student', teacher: 'Teacher', parent: 'Parent' };
+
     const state = {
-      role: 'student',
-      user: demoUsers.student,
+      role: PORTAL_ROLE,
+      user: demoUsers[PORTAL_ROLE],
       apiOnline: false,
       demoMode: false,
       sessionId: null,
@@ -2508,17 +2572,22 @@
       if (route === 'teacher-ingestion') loadTeacherDocuments();
     }
 
-    // Auth removed: no login or logout. Switching role is a pure client-side
-    // view change — the backend neither knows nor cares who is calling.
-    document.querySelector('#role-switch').addEventListener('change', event => {
-      const role = event.target.value;
-      state.sessionId = null;
-      state.lastAssistantMessageId = null;
-      state.activeIngestionDocumentId = null;
-      clearTimeout(state.ingestionPollTimer);
-      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Ready';
-      setRole(role, demoUsers[role]);
-    });
+    // Each portal is a separate process on its own port, so there is nothing to
+    // switch in-page: reaching another role means loading another origin. These
+    // links are a demo convenience, not a permission boundary — every portal is
+    // open to anyone who can reach its port.
+    function renderPortalLinks() {
+      const container = document.querySelector('#portal-links');
+      container.innerHTML = PORTAL_ROLES.map(role => {
+        const port = portalConfig.ports[role];
+        const label = PORTAL_NAMES[role];
+        if (role === PORTAL_ROLE) {
+          return `<span class="portal-link active" aria-current="page">${label}<em>:${port}</em></span>`;
+        }
+        const href = `${window.location.protocol}//${window.location.hostname}:${port}/`;
+        return `<a class="portal-link" href="${href}">${label}<em>:${port}</em></a>`;
+      }).join('');
+    }
 
     document.addEventListener('click', event => {
       const routeButton = event.target.closest('[data-route]');
@@ -4129,11 +4198,11 @@
     document.querySelector('#reload-parent-analytics-btn').addEventListener('click', () => loadParentDashboard());
 
 
-    // Auth removed: there is no session to restore. Boot straight into the
-    // student workspace and probe /health only to drive the connection pill.
+    // Auth removed: there is no session to restore. Boot straight into whichever
+    // portal this process serves and probe /health only to drive the connection pill.
     async function bootWorkspace() {
-      document.querySelector('#role-switch').value = 'student';
-      setRole('student', demoUsers.student);
+      renderPortalLinks();
+      setRole(PORTAL_ROLE, demoUsers[PORTAL_ROLE]);
 
       try {
         await apiJson('/api/ai/health');

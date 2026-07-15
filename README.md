@@ -15,8 +15,11 @@ Roognis delivers personalised AI tutoring through role-based portals for student
 >
 > - **Every API endpoint is open.** Anyone who can reach a service can read or
 >   write any data in it, including all student records.
-> - **There are no accounts, roles, or parent-child links.** The role switcher in
->   the sidebar is a client-side view toggle, not a permission boundary.
+> - **There are no accounts, roles, or parent-child links.** Each role is a
+>   separate frontend on its own port (3000/3001/3002). That is process
+>   separation for demo convenience, not a permission boundary — all three call
+>   the same open APIs, so opening the teacher port grants teacher screens to
+>   anyone who can reach it.
 > - **Chat sessions and image jobs have no owner.** `studentId`/`schoolId` were
 >   dropped from the `ai` schema, so any caller can read any session.
 > - **The student roster is a fixture.** It used to live in `auth_db.users`;
@@ -37,11 +40,15 @@ Roognis delivers personalised AI tutoring through role-based portals for student
 
 ```
 Browser
+  ├── Student portal :3000 ─┐
+  ├── Teacher portal :3001 ─┤  same image, PORTAL_ROLE differs.
+  ├── Parent  portal :3002 ─┤  each proxies /api/* to Traefik.
+  │                         │
   └── Traefik API Gateway (:80)
         ├── /api/ai        → AI Service        :3002  (Node.js + Prisma)
         ├── /api/rag       → RAG Service       :3003  (Python + FastAPI)
         ├── /api/analytics → Analytics Service :3004  (Node.js + Prisma)
-        └── /              → Frontend          :3000  (static HTML + Express)
+        └── /              → Student portal    :3000  (static HTML + Node http)
 
 Data Layer
   ├── PostgreSQL :5432     — 3 isolated schemas (ai_db, rag_db, analytics_db)
@@ -205,14 +212,42 @@ LLM_PROVIDER=ollama IMAGE_PROVIDER=comfyui docker-compose --profile local-ai up 
 
 ### 4. Access the application
 
+Each role is served by its own frontend process on its own port. There is no login
+and no role switcher — **the port you open is the portal you get.**
+
 | Service | URL | Description |
 |---|---|---|
-| Frontend | http://localhost:3000 | Main application |
+| Student portal | http://localhost:3000 | Tutor chat, diagrams, videos |
+| Teacher portal | http://localhost:3001 | Class overview, PDF ingestion |
+| Parent portal | http://localhost:3002 | Linked child progress |
 | API Gateway | http://localhost:80 | All API requests |
 | Traefik Dashboard | http://localhost:8080 | Live routing view |
 | ComfyUI | http://localhost:8188 | Optional local image generation UI |
 
-Log in with any demo account. The browser will redirect you to the correct dashboard for your role.
+`http://localhost/` also serves the student portal, via Traefik.
+
+The sidebar of each portal links to the other two. Those links are a demo
+convenience, **not** a boundary — every portal is open to anyone who can reach its
+port, and all three call the same unauthenticated APIs.
+
+To run the portals without Docker:
+
+```sh
+cd frontend
+npm run start:all        # all three: 3000 / 3001 / 3002
+npm run start:teacher    # or just one
+```
+
+Ports are configurable with `STUDENT_PORT`, `TEACHER_PORT`, and `PARENT_PORT`.
+Set them consistently across all three processes, since each portal builds its
+sidebar links from that map.
+
+> **Port clash if you run the backends outside Docker.** The parent portal's
+> `3002` is also the AI service's default `PORT`. Under `docker compose` there is
+> no conflict — the AI service is only reachable inside the Docker network and is
+> never published to the host. But if you run `services/ai` directly on your
+> machine alongside the portals, one of them will fail to bind. Move either:
+> `PARENT_PORT=3005 npm run start:all`.
 
 ---
 
@@ -245,9 +280,8 @@ LLM_PROVIDER=ollama IMAGE_PROVIDER=comfyui docker-compose --profile local-ai up 
 
 ### Frontend teacher flow
 
-1. Open `http://localhost:3000`.
-2. Log in as `teacher@demo.com` with password `demo1234`.
-3. In the teacher sidebar, open `Ingestion`.
+1. Open `http://localhost:3001` — the teacher portal. No login; the port selects the role.
+2. In the teacher sidebar, open `Ingestion`.
 4. Select a PDF and fill the required metadata fields: board, curriculum, grade, subject, book, chapter, chapter name, language, and edition.
 5. Click `Upload`.
 6. Watch the latest upload panel move through upload/processing states until it shows `Ready for retrieval` or a failure message.

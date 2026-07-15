@@ -4,6 +4,10 @@
   "private": true,
   "description": "Roognis AI — wired frontend MVP",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:student": "node portals.js student",
+    "start:teacher": "node portals.js teacher",
+    "start:parent": "node portals.js parent",
+    "start:all": "node portals.js"
   }
 }

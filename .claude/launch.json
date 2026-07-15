@@ -2,10 +2,22 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "roognis-frontend",
+      "name": "roognis-student",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["server.js"],
+      "runtimeArgs": ["frontend/portals.js", "student"],
       "port": 3000
+    },
+    {
+      "name": "roognis-teacher",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["frontend/portals.js", "teacher"],
+      "port": 3001
+    },
+    {
+      "name": "roognis-parent",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["frontend/portals.js", "parent"],
+      "port": 3002
     }
   ]
 }

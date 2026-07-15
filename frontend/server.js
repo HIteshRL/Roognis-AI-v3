@@ -12,6 +12,31 @@ const API_PROXY_TARGET = normalizeProxyTarget(
   'http://127.0.0.1'
 );
 
+// One portal per process. PORTAL_ROLE decides which of the three the served page
+// boots into; the page has no role switcher, so this is the only thing that sets it.
+const PORTAL_ROLES = ['student', 'teacher', 'parent'];
+const PORTAL_ROLE = PORTAL_ROLES.includes(process.env.PORTAL_ROLE)
+  ? process.env.PORTAL_ROLE
+  : 'student';
+
+// The ports the *browser* should use to reach the sibling portals, which is not
+// necessarily PORT: in Docker every portal listens on 3000 inside its container
+// and is published on a different host port.
+const PORTAL_PORTS = {
+  student: Number(process.env.STUDENT_PORT) || 3000,
+  teacher: Number(process.env.TEACHER_PORT) || 3001,
+  parent: Number(process.env.PARENT_PORT) || 3002,
+};
+
+const PORTAL_CONFIG_RE = /(<script id="portal-config" type="application\/json">)[\s\S]*?(<\/script>)/;
+
+// index.html ships with a valid default config block so it still opens straight
+// from disk; here we swap in what this particular process is actually serving.
+function renderIndex(html) {
+  const config = JSON.stringify({ role: PORTAL_ROLE, ports: PORTAL_PORTS });
+  return html.replace(PORTAL_CONFIG_RE, (_match, open, close) => `${open}${config}${close}`);
+}
+
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -58,17 +83,32 @@ const server = http.createServer((req, res) => {
           res.end('Not found');
           return;
         }
-        res.writeHead(200, { 'Content-Type': MIME_TYPES['.html'] });
-        res.end(fallbackData);
+        sendHtml(res, fallbackData);
       });
       return;
     }
 
     const ext = path.extname(filePath).toLowerCase();
+    if (ext === '.html') {
+      sendHtml(res, data);
+      return;
+    }
     res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
     res.end(data);
   });
 });
+
+function sendHtml(res, data) {
+  const body = renderIndex(data.toString('utf8'));
+  res.writeHead(200, {
+    'Content-Type': MIME_TYPES['.html'],
+    'Content-Length': Buffer.byteLength(body),
+    // The role is baked into the body, so a shared cache must not hand the
+    // teacher portal's HTML to the parent portal.
+    'Cache-Control': 'no-store',
+  });
+  res.end(body);
+}
 
 function normalizeProxyTarget(value) {
   const raw = String(value || '').trim() || 'http://127.0.0.1';
@@ -127,6 +167,6 @@ function proxyApiRequest(clientReq, clientRes) {
 }
 
 server.listen(PORT, HOST, () => {
-  console.log(`[frontend] running at http://${HOST}:${PORT}`);
-  console.log(`[frontend] proxying /api/* to ${API_PROXY_TARGET}`);
+  console.log(`[frontend:${PORTAL_ROLE}] portal running at http://${HOST}:${PORT}`);
+  console.log(`[frontend:${PORTAL_ROLE}] proxying /api/* to ${API_PROXY_TARGET}`);
 });

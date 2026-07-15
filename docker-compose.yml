@@ -184,21 +184,75 @@ services:
       - "traefik.http.routers.analytics.middlewares=cors@file"
     restart: unless-stopped
 
-  frontend:
+  # One portal per role, each on its own published port. The image is identical;
+  # only PORTAL_ROLE differs. Every portal listens on 3000 inside its container
+  # and proxies /api/* to Traefik, so the STUDENT_PORT/TEACHER_PORT/PARENT_PORT
+  # values below are the *host* ports the sidebar links point at.
+  #
+  # Auth removed: separate ports are demo convenience, not isolation. Anyone who
+  # can reach a port gets that portal.
+  frontend-student:
     build: ./frontend
+    ports:
+      - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: "http://localhost/api"
       API_PROXY_TARGET: "http://traefik"
       HOST: "0.0.0.0"
       PORT: 3000
+      PORTAL_ROLE: student
+      STUDENT_PORT: 3000
+      TEACHER_PORT: 3001
+      PARENT_PORT: 3002
       NODE_ENV: production
     depends_on:
       ai:
         condition: service_started
+    # Keeps http://localhost/ serving the student portal, as it did before the
+    # portals were split. The other two are reachable on their ports only.
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
       - "traefik.http.routers.frontend.middlewares=cors@file"
+    restart: unless-stopped
+
+  frontend-teacher:
+    build: ./frontend
+    ports:
+      - "3001:3000"
+    environment:
+      API_PROXY_TARGET: "http://traefik"
+      HOST: "0.0.0.0"
+      PORT: 3000
+      PORTAL_ROLE: teacher
+      STUDENT_PORT: 3000
+      TEACHER_PORT: 3001
+      PARENT_PORT: 3002
+      NODE_ENV: production
+    depends_on:
+      ai:
+        condition: service_started
+    labels:
+      - "traefik.enable=false"
+    restart: unless-stopped
+
+  frontend-parent:
+    build: ./frontend
+    ports:
+      - "3002:3000"
+    environment:
+      API_PROXY_TARGET: "http://traefik"
+      HOST: "0.0.0.0"
+      PORT: 3000
+      PORTAL_ROLE: parent
+      STUDENT_PORT: 3000
+      TEACHER_PORT: 3001
+      PARENT_PORT: 3002
+      NODE_ENV: production
+    depends_on:
+      ai:
+        condition: service_started
+    labels:
+      - "traefik.enable=false"
     restart: unless-stopped

@@ -16,8 +16,12 @@ http:
   middlewares:
     cors:
       headers:
+        # One origin per demo portal. The portals normally proxy /api/* through
+        # their own origin, so these only matter if a page calls the gateway directly.
         accessControlAllowOriginList:
           - "http://localhost:3000"
+          - "http://localhost:3001"
+          - "http://localhost:3002"
         accessControlAllowCredentials: true
         accessControlAllowMethods:
           - "GET"
