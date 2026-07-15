@@ -184,6 +184,34 @@ services:
       - "traefik.http.routers.analytics.middlewares=cors@file"
     restart: unless-stopped
 
+  # LMS core ported from Roognis v2: classes, stream, coursework, submissions,
+  # grading, rubrics, gradebook, calendar, guardians. Same no-auth demo tenancy
+  # as the rest of the stack.
+  classroom:
+    build: ./services/classroom
+    command: >
+      sh -c "[ -f prisma/schema.prisma ] &&
+             npx prisma db push --schema=prisma/schema.prisma ||
+             true && node server.js"
+    environment:
+      DATABASE_URL: "postgresql://postgres:${DB_PASSWORD}@postgres:5432/roognis?schema=classroom_db"
+      DEMO_SCHOOL_ID: ${DEMO_SCHOOL_ID:-00000000-0000-0000-0000-000000000001}
+      DEMO_STUDENT_ID: ${DEMO_STUDENT_ID:-00000000-0000-0000-0000-000000000002}
+      DEMO_TEACHER_ID: ${DEMO_TEACHER_ID:-00000000-0000-0000-0000-000000000003}
+      PORT: 3005
+      NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.classroom.rule=PathPrefix(`/api/classroom`)"
+      - "traefik.http.routers.classroom.entrypoints=web"
+      - "traefik.http.services.classroom.loadbalancer.server.port=3005"
+      - "traefik.http.routers.classroom.middlewares=cors@file"
+    restart: unless-stopped
+
   # One portal per role, each on its own published port. The image is identical;
   # only PORTAL_ROLE differs. Every portal listens on 3000 inside its container
   # and proxies /api/* to Traefik, so the STUDENT_PORT/TEACHER_PORT/PARENT_PORT

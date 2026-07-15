@@ -14,6 +14,8 @@ resources:
   - rag/service.yaml
   - analytics/deployment.yaml
   - analytics/service.yaml
+  - classroom/deployment.yaml
+  - classroom/service.yaml
   - frontend/deployment.yaml
   - frontend/service.yaml
   - ingress/ingress.yaml

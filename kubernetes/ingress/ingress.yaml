@@ -38,6 +38,13 @@ spec:
                 name: analytics
                 port:
                   number: 3004
+          - path: /api/classroom
+            pathType: Prefix
+            backend:
+              service:
+                name: classroom
+                port:
+                  number: 3005
           - path: /
             pathType: Prefix
             backend:

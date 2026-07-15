@@ -1,0 +1,25 @@
+{
+  "name": "roognis-classroom",
+  "version": "1.0.0",
+  "description": "Roognis AI classroom service — LMS core (classes, stream, coursework, grading, rubrics, guardians, calendar)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:push": "npx prisma db push --schema=prisma/schema.prisma",
+    "db:generate": "npx prisma generate --schema=prisma/schema.prisma",
+    "seed": "node scripts/seed.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "prisma": "^5.14.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

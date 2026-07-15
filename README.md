@@ -48,6 +48,7 @@ Browser
         ├── /api/ai        → AI Service        :3002  (Node.js + Prisma)
         ├── /api/rag       → RAG Service       :3003  (Python + FastAPI)
         ├── /api/analytics → Analytics Service :3004  (Node.js + Prisma)
+        ├── /api/classroom → Classroom Service :3005  (Node.js + Prisma) — LMS from v2
         └── /              → Student portal    :3000  (static HTML + Node http)
 
 Data Layer
@@ -210,6 +211,14 @@ To use local fallback providers:
 LLM_PROVIDER=ollama IMAGE_PROVIDER=comfyui docker-compose --profile local-ai up --build
 ```
 
+Optional: seed a demo classroom so the LMS boots with living data — one class
+(join code `SCIDEM6`), the roster enrolled, a pinned stream post, a rubric, and
+three assignments (one graded, one awaiting grading, one open):
+
+```sh
+docker compose exec classroom npm run seed
+```
+
 ### 4. Access the application
 
 Each role is served by its own frontend process on its own port. There is no login
@@ -250,6 +259,35 @@ sidebar links from that map.
 > `PARENT_PORT=3005 npm run start:all`.
 
 ---
+
+## Classroom LMS (ported from Roognis v2)
+
+The classroom service (`services/classroom/`, `:3005`, `/api/classroom`) brings
+the v2 Google-Classroom-parity core into this stack, adapted to the no-auth demo
+tenancy. What works end to end across the three portals:
+
+| Feature | Teacher portal (:3001) | Student portal (:3000) | Parent portal (:3002) |
+|---|---|---|---|
+| Classes | create, archive/restore, join-code rotate/disable, roster | join by code, leave | — |
+| Stream | post, draft, publish, pin, delete | read (published only) | — |
+| Classwork | assignment/homework/quiz/exam/practice set; draft → scheduled → published → archived; duplicate | list published, see own status | — |
+| Submissions | list per assignment, download grade view | turn in text, resubmit (attempt++), withdraw before due | — |
+| Grading | score + comment + private feedback, rubric scoring, return; append-only grade history | see returned grade + rubric breakdown | recent grades |
+| Rubrics | reusable library, attach to assignment (copies criteria) | rubric shown on assignment | — |
+| Gradebook | matrix, class average, CSV export | per-class "My grades" | — |
+| Calendar | — | next-30-days due list across classes | — |
+| Guardians | link/remove guardian emails per student | — | upcoming / missing / recent-grades digest |
+
+Faithfully ported v2 rules: late submissions honour `allowLate` after the due
+date; a submission needs `withdraw`/`resubmit` once turned in; withdrawing is
+blocked after the deadline; grades are append-only (a regrade adds history, the
+latest wins); gradebook averages count **returned** grades only; students never
+see drafts or scheduled items; scheduled work auto-publishes lazily on read.
+
+Not ported (out of scope for the demo): file-upload submissions and materials
+(needs shared file storage on this path), discussions/comments, notifications,
+polls, topics, co-teachers, invitations and join-request approval, institutions,
+and the admin console.
 
 ## EKE Ingestion Setup and Verification
 

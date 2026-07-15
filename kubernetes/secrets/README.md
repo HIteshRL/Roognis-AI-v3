@@ -33,6 +33,14 @@ kubectl create secret generic analytics-secrets \
   --from-literal=DEMO_STUDENT_ID="00000000-0000-0000-0000-000000000002" \
   --from-literal=DEMO_TEACHER_ID="00000000-0000-0000-0000-000000000003"
 
+# Classroom service (LMS)
+kubectl create secret generic classroom-secrets \
+  --namespace roognis \
+  --from-literal=DATABASE_URL="postgresql://<DB_USER>:<DB_PASS>@<DB_HOST>/roognis?schema=classroom_db" \
+  --from-literal=DEMO_SCHOOL_ID="00000000-0000-0000-0000-000000000001" \
+  --from-literal=DEMO_STUDENT_ID="00000000-0000-0000-0000-000000000002" \
+  --from-literal=DEMO_TEACHER_ID="00000000-0000-0000-0000-000000000003"
+
 # RAG service
 kubectl create secret generic rag-secrets \
   --namespace roognis \

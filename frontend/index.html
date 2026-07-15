@@ -1622,6 +1622,162 @@
         max-width: 100%;
       }
     }
+    /* ── LMS (classes / classwork / grading), ported from Roognis v2 ─────── */
+
+    .lms-inline {
+      display: flex;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .lms-inline .field-group { flex: 1; }
+
+    .lms-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .lms-class-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .lms-class-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+    }
+
+    .lms-color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 5px;
+      background: var(--green);
+      display: inline-block;
+    }
+
+    .lms-tabs {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 3px;
+      background: var(--surface);
+    }
+
+    .lms-tab {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: calc(var(--radius) - 3px);
+      cursor: pointer;
+    }
+
+    .lms-tab.active {
+      background: var(--grad-accent);
+      color: #fff;
+    }
+
+    .lms-item {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      background: var(--surface);
+    }
+
+    .lms-item + .lms-item { margin-top: 8px; }
+
+    .lms-item-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .lms-item-head strong { font-size: 14px; }
+
+    .lms-item-head .lms-spacer { margin-left: auto; }
+
+    .lms-item-body {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--ink-soft);
+      white-space: pre-wrap;
+    }
+
+    .lms-item-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .lms-item-actions .btn { min-height: 30px; padding: 0 10px; font-size: 12px; }
+
+    .lms-join-code {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      padding: 10px 14px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      display: inline-block;
+      background: var(--surface-2);
+    }
+
+    .pill.warn { background: #fdefe3; color: #9a5b13; }
+    .pill.late { background: #fbe4e6; color: #a12633; }
+    .pill.ok   { background: var(--green-tint); color: var(--green-dark); }
+
+    .lms-table-wrap { overflow-x: auto; }
+
+    .lms-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .lms-table th,
+    .lms-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .lms-table th { color: var(--muted); font-weight: 600; }
+
+    .lms-rubric-row {
+      display: grid;
+      grid-template-columns: 1fr 90px;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .lms-grade-form {
+      border-top: 1px dashed var(--line);
+      margin-top: 10px;
+      padding-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    @media (max-width: 760px) {
+      .lms-tabs { margin-left: 0; width: 100%; overflow-x: auto; }
+      .lms-inline { flex-wrap: wrap; }
+    }
   </style>
 
   <!-- Rewritten per-process by frontend/server.js from PORTAL_ROLE and the
@@ -1963,6 +2119,84 @@
           </div>
         </section>
 
+        <!-- LMS (ported from Roognis v2): student side — join classes, stream,
+             classwork, submissions, grades, upcoming work. -->
+        <section class="view" id="student-classes">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Classes</p>
+              <h1>Your classes.</h1>
+              <p class="subtext">Join with a class code, follow the stream, turn in work, and track grades.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="sc-refresh-btn">Refresh</button>
+            </div>
+          </div>
+
+          <div class="grid dashboard-grid" id="sc-home">
+            <section class="panel span-5">
+              <div class="panel-header">
+                <div class="panel-title">Join a class</div>
+                <span class="pill" id="sc-join-pill">Ready</span>
+              </div>
+              <div class="panel-body">
+                <div class="field-group">
+                  <label for="sc-join-code">Class code from your teacher</label>
+                  <div class="lms-inline">
+                    <input class="field" id="sc-join-code" maxlength="8" placeholder="e.g. K7PQXR" autocomplete="off" />
+                    <button class="btn primary" id="sc-join-btn">Join</button>
+                  </div>
+                </div>
+                <div class="list" id="sc-class-list" style="margin-top:14px">
+                  <div class="quiet-box"><strong>No classes yet.</strong><p>Ask your teacher for a class code.</p></div>
+                </div>
+              </div>
+            </section>
+            <section class="panel span-7">
+              <div class="panel-header">
+                <div class="panel-title">Coming up</div>
+                <span class="pill" id="sc-calendar-pill">Next 30 days</span>
+              </div>
+              <div class="panel-body list" id="sc-calendar">
+                <div class="quiet-box"><strong>Nothing due.</strong><p>Assignments with due dates appear here.</p></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="hidden" id="sc-class-view">
+            <div class="lms-class-head">
+              <button class="btn" id="sc-back-btn">&larr; All classes</button>
+              <div class="lms-class-title">
+                <span class="lms-color-dot" id="sc-class-dot"></span>
+                <strong id="sc-class-name">Class</strong>
+                <span class="item-subtitle" id="sc-class-meta"></span>
+              </div>
+              <div class="lms-tabs" id="sc-tabs">
+                <button class="lms-tab active" data-sc-tab="stream">Stream</button>
+                <button class="lms-tab" data-sc-tab="work">Classwork</button>
+                <button class="lms-tab" data-sc-tab="grades">Grades</button>
+              </div>
+            </div>
+            <div class="grid dashboard-grid">
+              <section class="panel span-12" id="sc-tab-stream">
+                <div class="panel-header"><div class="panel-title">Stream</div></div>
+                <div class="panel-body list" id="sc-stream-list"></div>
+              </section>
+              <section class="panel span-12 hidden" id="sc-tab-work">
+                <div class="panel-header">
+                  <div class="panel-title">Classwork</div>
+                  <span class="pill" id="sc-work-pill">Published</span>
+                </div>
+                <div class="panel-body list" id="sc-work-list"></div>
+              </section>
+              <section class="panel span-12 hidden" id="sc-tab-grades">
+                <div class="panel-header"><div class="panel-title">My grades</div></div>
+                <div class="panel-body list" id="sc-grades-list"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
         <section class="view" id="teacher-mvp">
           <div class="page-head">
             <div>
@@ -2191,6 +2425,197 @@
           </div>
         </section>
 
+        <!-- LMS (ported from Roognis v2): teacher side — manage classes, stream,
+             classwork lifecycle, grading with rubrics, gradebook, guardians. -->
+        <section class="view" id="teacher-classes">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Classes</p>
+              <h1>Manage your classes.</h1>
+              <p class="subtext">Create classes, post to the stream, assign and grade work, and export the gradebook.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="tc-archived-btn">Show archived</button>
+              <button class="btn" id="tc-refresh-btn">Refresh</button>
+              <button class="btn primary" id="tc-new-btn">New class</button>
+            </div>
+          </div>
+
+          <div id="tc-home">
+            <div class="grid dashboard-grid">
+              <section class="panel span-5 hidden" id="tc-create-panel">
+                <div class="panel-header"><div class="panel-title">New class</div></div>
+                <div class="panel-body">
+                  <div class="field-group"><label for="tc-new-name">Name *</label><input class="field" id="tc-new-name" placeholder="Science 6A" /></div>
+                  <div class="lms-inline" style="margin-top:10px">
+                    <div class="field-group"><label for="tc-new-subject">Subject</label><input class="field" id="tc-new-subject" placeholder="Science" /></div>
+                    <div class="field-group"><label for="tc-new-section">Section</label><input class="field" id="tc-new-section" placeholder="6A" /></div>
+                  </div>
+                  <div class="lms-inline" style="margin-top:10px">
+                    <div class="field-group"><label for="tc-new-room">Room</label><input class="field" id="tc-new-room" placeholder="104" /></div>
+                    <div class="field-group"><label for="tc-new-grade">Grade</label><input class="field" id="tc-new-grade" placeholder="6" /></div>
+                  </div>
+                  <div class="lms-inline" style="margin-top:12px">
+                    <button class="btn primary" id="tc-create-btn">Create class</button>
+                    <button class="btn" id="tc-create-cancel-btn">Cancel</button>
+                  </div>
+                  <p class="item-subtitle" id="tc-create-error" style="margin-top:8px"></p>
+                </div>
+              </section>
+              <section class="panel span-12">
+                <div class="panel-header">
+                  <div class="panel-title" id="tc-list-title">Active classes</div>
+                  <span class="pill" id="tc-list-pill">Loading</span>
+                </div>
+                <div class="panel-body list" id="tc-class-list"></div>
+              </section>
+            </div>
+          </div>
+
+          <div class="hidden" id="tc-class-view">
+            <div class="lms-class-head">
+              <button class="btn" id="tc-back-btn">&larr; All classes</button>
+              <div class="lms-class-title">
+                <span class="lms-color-dot" id="tc-class-dot"></span>
+                <strong id="tc-class-name">Class</strong>
+                <span class="item-subtitle" id="tc-class-meta"></span>
+              </div>
+              <div class="lms-tabs" id="tc-tabs">
+                <button class="lms-tab active" data-tc-tab="stream">Stream</button>
+                <button class="lms-tab" data-tc-tab="work">Classwork</button>
+                <button class="lms-tab" data-tc-tab="people">People</button>
+                <button class="lms-tab" data-tc-tab="gradebook">Gradebook</button>
+                <button class="lms-tab" data-tc-tab="rubrics">Rubrics</button>
+              </div>
+            </div>
+
+            <div class="grid dashboard-grid" id="tc-tab-stream">
+              <section class="panel span-5">
+                <div class="panel-header"><div class="panel-title">New post</div></div>
+                <div class="panel-body">
+                  <div class="field-group"><label for="tc-post-title">Title (optional)</label><input class="field" id="tc-post-title" /></div>
+                  <div class="field-group" style="margin-top:10px"><label for="tc-post-body">Announcement *</label><textarea class="field" id="tc-post-body" rows="4" placeholder="Share something with your class"></textarea></div>
+                  <label class="lms-check" style="margin-top:10px"><input type="checkbox" id="tc-post-pinned" /> Pin to top</label>
+                  <div class="lms-inline" style="margin-top:12px">
+                    <button class="btn primary" id="tc-post-btn">Post</button>
+                    <button class="btn" id="tc-post-draft-btn">Save draft</button>
+                  </div>
+                </div>
+              </section>
+              <section class="panel span-7">
+                <div class="panel-header"><div class="panel-title">Stream</div><span class="pill" id="tc-stream-pill">Loading</span></div>
+                <div class="panel-body list" id="tc-stream-list"></div>
+              </section>
+            </div>
+
+            <div class="grid dashboard-grid hidden" id="tc-tab-work">
+              <section class="panel span-5">
+                <div class="panel-header"><div class="panel-title">New classwork</div></div>
+                <div class="panel-body">
+                  <div class="lms-inline">
+                    <div class="field-group"><label for="tc-cw-type">Type</label>
+                      <select class="field" id="tc-cw-type">
+                        <option value="assignment">Assignment</option>
+                        <option value="homework">Homework</option>
+                        <option value="quiz">Quiz</option>
+                        <option value="exam">Exam</option>
+                        <option value="practice_set">Practice set</option>
+                      </select>
+                    </div>
+                    <div class="field-group"><label for="tc-cw-points">Points</label><input class="field" id="tc-cw-points" type="number" min="0" placeholder="10" /></div>
+                  </div>
+                  <div class="field-group" style="margin-top:10px"><label for="tc-cw-title">Title *</label><input class="field" id="tc-cw-title" /></div>
+                  <div class="field-group" style="margin-top:10px"><label for="tc-cw-body">Instructions</label><textarea class="field" id="tc-cw-body" rows="3"></textarea></div>
+                  <div class="lms-inline" style="margin-top:10px">
+                    <div class="field-group"><label for="tc-cw-due">Due</label><input class="field" id="tc-cw-due" type="datetime-local" /></div>
+                    <div class="field-group"><label for="tc-cw-rubric">Rubric</label>
+                      <select class="field" id="tc-cw-rubric"><option value="">None</option></select>
+                    </div>
+                  </div>
+                  <label class="lms-check" style="margin-top:10px"><input type="checkbox" id="tc-cw-late" checked /> Accept late submissions</label>
+                  <div class="lms-inline" style="margin-top:12px">
+                    <button class="btn primary" id="tc-cw-publish-btn">Assign now</button>
+                    <button class="btn" id="tc-cw-draft-btn">Save draft</button>
+                  </div>
+                  <p class="item-subtitle" id="tc-cw-error" style="margin-top:8px"></p>
+                </div>
+              </section>
+              <section class="panel span-7">
+                <div class="panel-header"><div class="panel-title">Classwork</div><span class="pill" id="tc-work-pill">Loading</span></div>
+                <div class="panel-body list" id="tc-work-list"></div>
+              </section>
+              <section class="panel span-12 hidden" id="tc-subs-panel">
+                <div class="panel-header">
+                  <div class="panel-title" id="tc-subs-title">Submissions</div>
+                  <button class="btn" id="tc-subs-close-btn">Close</button>
+                </div>
+                <div class="panel-body list" id="tc-subs-list"></div>
+              </section>
+            </div>
+
+            <div class="grid dashboard-grid hidden" id="tc-tab-people">
+              <section class="panel span-6">
+                <div class="panel-header"><div class="panel-title">Students</div><span class="pill" id="tc-roster-pill">Loading</span></div>
+                <div class="panel-body list" id="tc-roster-list"></div>
+              </section>
+              <section class="panel span-6">
+                <div class="panel-header"><div class="panel-title">Join code</div></div>
+                <div class="panel-body">
+                  <div class="lms-join-code" id="tc-join-code">------</div>
+                  <p class="item-subtitle">Students join from their portal with this code.</p>
+                  <div class="lms-inline" style="margin-top:10px">
+                    <button class="btn" id="tc-code-regen-btn">New code</button>
+                    <button class="btn" id="tc-code-toggle-btn">Disable joining</button>
+                  </div>
+                </div>
+              </section>
+              <section class="panel span-12">
+                <div class="panel-header"><div class="panel-title">Guardians</div></div>
+                <div class="panel-body" id="tc-guardians-body">
+                  <div class="lms-inline">
+                    <div class="field-group"><label for="tc-guardian-student">Student</label><select class="field" id="tc-guardian-student"></select></div>
+                    <div class="field-group"><label for="tc-guardian-email">Guardian email</label><input class="field" id="tc-guardian-email" type="email" placeholder="parent@example.com" /></div>
+                    <button class="btn primary" id="tc-guardian-add-btn" style="align-self:end">Link guardian</button>
+                  </div>
+                  <div class="list" id="tc-guardians-list" style="margin-top:12px"></div>
+                </div>
+              </section>
+            </div>
+
+            <div class="grid dashboard-grid hidden" id="tc-tab-gradebook">
+              <section class="panel span-12">
+                <div class="panel-header">
+                  <div class="panel-title">Gradebook</div>
+                  <div class="lms-inline">
+                    <span class="pill" id="tc-gradebook-pill">Loading</span>
+                    <button class="btn" id="tc-gradebook-csv-btn">Export CSV</button>
+                  </div>
+                </div>
+                <div class="panel-body" id="tc-gradebook-body"></div>
+              </section>
+            </div>
+
+            <div class="grid dashboard-grid hidden" id="tc-tab-rubrics">
+              <section class="panel span-5">
+                <div class="panel-header"><div class="panel-title">New rubric</div></div>
+                <div class="panel-body">
+                  <div class="field-group"><label for="tc-rubric-title">Title *</label><input class="field" id="tc-rubric-title" placeholder="Written answer rubric" /></div>
+                  <div id="tc-rubric-criteria" style="margin-top:10px"></div>
+                  <div class="lms-inline" style="margin-top:10px">
+                    <button class="btn" id="tc-rubric-add-row-btn">Add criterion</button>
+                    <button class="btn primary" id="tc-rubric-create-btn">Create rubric</button>
+                  </div>
+                  <p class="item-subtitle" id="tc-rubric-error" style="margin-top:8px"></p>
+                </div>
+              </section>
+              <section class="panel span-7">
+                <div class="panel-header"><div class="panel-title">Rubric library</div><span class="pill" id="tc-rubrics-pill">Loading</span></div>
+                <div class="panel-body list" id="tc-rubrics-list"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
         <section class="view" id="parent-mvp">
           <div class="page-head">
             <div>
@@ -2254,6 +2679,32 @@
                 </div>
               </div>
             </section>
+
+            <!-- LMS guardian summary (ported from Roognis v2): upcoming, missing,
+                 and recently graded classwork for the selected child. -->
+            <section class="panel span-7">
+              <div class="panel-header">
+                <div class="panel-title">Classroom summary</div>
+                <span class="pill" id="parent-lms-pill">Loading</span>
+              </div>
+              <div class="panel-body split-grid" id="parent-lms-summary">
+                <div class="list" id="parent-lms-upcoming">
+                  <div class="quiet-box"><strong>Nothing upcoming.</strong><p>Assignments with future due dates appear here.</p></div>
+                </div>
+                <div class="list" id="parent-lms-missing">
+                  <div class="quiet-box"><strong>Nothing missing.</strong><p>Past-due work without a submission appears here.</p></div>
+                </div>
+              </div>
+            </section>
+            <section class="panel span-5">
+              <div class="panel-header">
+                <div class="panel-title">Recent grades</div>
+              </div>
+              <div class="panel-body list" id="parent-lms-grades">
+                <div class="quiet-box"><strong>No returned grades yet.</strong><p>Grades appear once the teacher returns work.</p></div>
+              </div>
+            </section>
+
             <section class="panel span-12">
               <div class="panel-header">
                 <div class="panel-title">Course progress and weak areas</div>
@@ -2311,6 +2762,7 @@
       video: 'M3 5h18v14H3z M10 9l5 3-5 3',
       upload: 'M12 16V4 M7 9l5-5 5 5 M4 20h16',
       user: 'M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21a6 6 0 0 1 12 0 M17 7v6M14 10h6',
+      classes: 'M4 6h16M4 6v12h16V6M4 6l8-3 8 3 M9 11h6',
     };
 
     const roleConfig = {
@@ -2322,6 +2774,7 @@
         nav: [
           ['student-mvp', 'Home', iconPaths.dashboard],
           ['student-tutor', 'Tutor', iconPaths.chat],
+          ['student-classes', 'Classes', iconPaths.classes],
           ['student-diagrams', 'Diagrams', iconPaths.image],
           ['student-videos', 'Videos', iconPaths.video],
         ],
@@ -2333,6 +2786,7 @@
         defaultRoute: 'teacher-mvp',
         nav: [
           ['teacher-mvp', 'Class Overview', iconPaths.dashboard],
+          ['teacher-classes', 'Classes', iconPaths.classes],
           ['teacher-ingestion', 'Ingestion', iconPaths.upload],
         ],
       },
@@ -2352,8 +2806,10 @@
       'student-tutor': ['Tutor', 'Ask questions from your selected lesson'],
       'student-diagrams': ['Diagrams', 'Create school diagrams'],
       'student-videos': ['Videos', 'Video recommendations from tutor chat'],
+      'student-classes': ['Classes', 'Join classes, submit work, and track grades'],
       'teacher-mvp': ['Teacher Dashboard', 'Class activity and knowledge coverage'],
       'teacher-ingestion': ['Knowledge Ingestion', 'Upload PDFs into the Educational Knowledge Engine'],
+      'teacher-classes': ['Classes', 'Manage classes, assignments, grading, and the gradebook'],
       'parent-mvp': ['Parent Progress', 'Linked child summary from analytics'],
     };
 
@@ -2570,6 +3026,8 @@
         loadChatSessions();
       }
       if (route === 'teacher-ingestion') loadTeacherDocuments();
+      if (route === 'teacher-classes') tcInit();
+      if (route === 'student-classes') scInit();
     }
 
     // Each portal is a separate process on its own port, so there is nothing to
@@ -4156,10 +4614,19 @@
         setText('#parent-analytics-pill', 'Demo');
         return;
       }
+      let payload;
       try {
         // Auth removed: no parent accounts or child links, so this is the whole
-        // demo roster rather than "this parent's children".
-        const payload = await apiJson('/api/analytics/students');
+        // demo roster rather than "this parent's children". The classroom
+        // service serves the same roster, so either being up is enough.
+        payload = await apiJson('/api/analytics/students')
+          .catch(() => apiJson('/api/classroom/students'));
+      } catch (error) {
+        container.innerHTML = '<div class="quiet-box"><strong>Demo roster unavailable.</strong><p>Neither the analytics nor the classroom service could load the student roster.</p></div>';
+        setText('#parent-analytics-pill', 'Unavailable');
+        return;
+      }
+      try {
         const children = payload.students || [];
         state.selectedParentStudentId = children[0]?.studentId || null;
         if (!children.length) {
@@ -4180,9 +4647,11 @@
             <button class="btn" data-parent-student="${escapeHtml(child.studentId)}">View</button>
           </div>
         `).join('');
+        // The classroom summary loads independently of analytics, so a dead
+        // analytics service still leaves the guardian digest working.
+        parentLmsLoad(state.selectedParentStudentId);
         await loadParentDashboard(state.selectedParentStudentId);
       } catch (error) {
-        container.innerHTML = '<div class="quiet-box"><strong>Demo roster unavailable.</strong><p>The analytics service could not load the student roster.</p></div>';
         setText('#parent-analytics-pill', 'Unavailable');
       }
     }
@@ -4191,12 +4660,851 @@
       const button = event.target.closest('[data-parent-student]');
       if (!button) return;
       state.selectedParentStudentId = button.dataset.parentStudent;
+      parentLmsLoad(state.selectedParentStudentId);
       loadParentDashboard(state.selectedParentStudentId);
     });
 
     document.querySelector('#reload-teacher-analytics-btn').addEventListener('click', loadTeacherDashboard);
     document.querySelector('#reload-parent-analytics-btn').addEventListener('click', () => loadParentDashboard());
 
+
+    // ── LMS (classes / classwork / grading), ported from Roognis v2 ─────────
+    // Talks to the classroom service via /api/classroom/*. All ids default to
+    // the demo personas server-side, so the calls only pass what the UI knows.
+
+    const lms = {
+      teacher: {
+        classes: [], showArchived: false, active: null, tab: 'stream',
+        rubrics: [], coursework: [], subsFor: null, roster: [],
+      },
+      student: { classes: [], active: null, tab: 'stream', coursework: [] },
+      loadedOnce: { teacher: false, student: false },
+    };
+
+    function lmsWhen(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function lmsStatusPill(status) {
+      const map = {
+        draft: ['Draft', 'warn'], scheduled: ['Scheduled', 'warn'],
+        published: ['Published', 'ok'], archived: ['Archived', ''],
+        submitted: ['Turned in', 'ok'], returned: ['Returned', 'blue'],
+        withdrawn: ['Withdrawn', 'warn'], missing: ['Missing', 'late'],
+      };
+      const [label, tone] = map[status] || [status, ''];
+      return `<span class="pill ${tone}">${escapeHtml(label)}</span>`;
+    }
+
+    function lmsError(err) {
+      return escapeHtml(err?.message || 'Request failed');
+    }
+
+    function lmsQuiet(title, body) {
+      return `<div class="quiet-box"><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></div>`;
+    }
+
+    // ── Teacher: classes ─────────────────────────────────────────────────────
+
+    async function tcInit(force = false) {
+      if (lms.loadedOnce.teacher && !force) return;
+      lms.loadedOnce.teacher = true;
+      await tcLoadClasses();
+    }
+
+    async function tcLoadClasses() {
+      const list = document.querySelector('#tc-class-list');
+      setText('#tc-list-pill', 'Loading');
+      try {
+        const payload = await apiJson(`/api/classroom/classes?archived=${lms.teacher.showArchived}`);
+        lms.teacher.classes = payload.items || [];
+        setText('#tc-list-pill', `${payload.total} class${payload.total === 1 ? '' : 'es'}`);
+        setText('#tc-list-title', lms.teacher.showArchived ? 'Archived classes' : 'Active classes');
+        if (!lms.teacher.classes.length) {
+          list.innerHTML = lmsQuiet(
+            lms.teacher.showArchived ? 'No archived classes.' : 'No classes yet.',
+            lms.teacher.showArchived ? 'Archived classes appear here.' : 'Create your first class to get a join code.',
+          );
+          return;
+        }
+        list.innerHTML = lms.teacher.classes.map(c => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              <span class="lms-color-dot" style="background:${escapeHtml(c.color)}"></span>
+              <strong>${escapeHtml(c.name)}</strong>
+              <span class="item-subtitle">${escapeHtml([c.subject, c.section, c.room && `Room ${c.room}`].filter(Boolean).join(' · '))}</span>
+              <span class="lms-spacer pill">${c.studentCount ?? 0} students</span>
+              <span class="pill blue">Code ${escapeHtml(c.joinCode)}</span>
+            </div>
+            <div class="lms-item-actions">
+              ${c.isArchived
+                ? `<button class="btn" data-tc-act="unarchive" data-id="${c.id}">Restore</button>`
+                : `<button class="btn primary" data-tc-act="open" data-id="${c.id}">Open</button>
+                   <button class="btn" data-tc-act="archive" data-id="${c.id}">Archive</button>`}
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        setText('#tc-list-pill', 'Offline');
+        list.innerHTML = lmsQuiet('Classroom service unavailable.', lmsError(error));
+      }
+    }
+
+    async function tcOpenClass(id) {
+      const c = lms.teacher.classes.find(x => x.id === id);
+      if (!c) return;
+      lms.teacher.active = c;
+      document.querySelector('#tc-home').classList.add('hidden');
+      document.querySelector('#tc-class-view').classList.remove('hidden');
+      document.querySelector('#tc-class-dot').style.background = c.color;
+      setText('#tc-class-name', c.name);
+      setText('#tc-class-meta', [c.subject, c.section].filter(Boolean).join(' · '));
+      tcShowTab('stream');
+      tcLoadRubrics();
+    }
+
+    function tcShowTab(tab) {
+      lms.teacher.tab = tab;
+      document.querySelectorAll('#tc-tabs .lms-tab').forEach(b =>
+        b.classList.toggle('active', b.dataset.tcTab === tab));
+      for (const name of ['stream', 'work', 'people', 'gradebook', 'rubrics']) {
+        document.querySelector(`#tc-tab-${name}`).classList.toggle('hidden', name !== tab);
+      }
+      if (tab === 'stream') tcLoadStream();
+      if (tab === 'work') { tcLoadWork(); document.querySelector('#tc-subs-panel').classList.add('hidden'); }
+      if (tab === 'people') { tcLoadRoster(); tcLoadGuardianPanel(); }
+      if (tab === 'gradebook') tcLoadGradebook();
+      if (tab === 'rubrics') tcLoadRubrics();
+    }
+
+    // ── Teacher: stream ──────────────────────────────────────────────────────
+
+    async function tcLoadStream() {
+      const list = document.querySelector('#tc-stream-list');
+      try {
+        const payload = await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/announcements`);
+        setText('#tc-stream-pill', `${payload.total} post${payload.total === 1 ? '' : 's'}`);
+        if (!payload.items.length) {
+          list.innerHTML = lmsQuiet('No posts yet.', 'Share announcements with your class from the composer.');
+          return;
+        }
+        list.innerHTML = payload.items.map(a => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              ${a.isPinned ? '<span class="pill warn">Pinned</span>' : ''}
+              ${lmsStatusPill(a.status)}
+              <strong>${escapeHtml(a.title || 'Announcement')}</strong>
+              <span class="lms-spacer item-subtitle">${lmsWhen(a.publishedAt || a.createdAt)}</span>
+            </div>
+            <p class="lms-item-body">${escapeHtml(a.body)}</p>
+            <div class="lms-item-actions">
+              ${a.status !== 'published' ? `<button class="btn" data-tc-act="post-publish" data-id="${a.id}">Publish</button>` : ''}
+              <button class="btn" data-tc-act="post-pin" data-id="${a.id}" data-pinned="${!a.isPinned}">${a.isPinned ? 'Unpin' : 'Pin'}</button>
+              <button class="btn" data-tc-act="post-delete" data-id="${a.id}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        setText('#tc-stream-pill', 'Offline');
+        list.innerHTML = lmsQuiet('Could not load the stream.', lmsError(error));
+      }
+    }
+
+    async function tcCreatePost(status) {
+      const body = document.querySelector('#tc-post-body').value.trim();
+      if (!body) return;
+      await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/announcements`, {
+        method: 'POST',
+        body: {
+          title: document.querySelector('#tc-post-title').value.trim() || undefined,
+          body,
+          status,
+          isPinned: document.querySelector('#tc-post-pinned').checked,
+        },
+      });
+      document.querySelector('#tc-post-title').value = '';
+      document.querySelector('#tc-post-body').value = '';
+      document.querySelector('#tc-post-pinned').checked = false;
+      tcLoadStream();
+    }
+
+    // ── Teacher: classwork + grading ─────────────────────────────────────────
+
+    async function tcLoadWork() {
+      const list = document.querySelector('#tc-work-list');
+      try {
+        const payload = await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/coursework`);
+        lms.teacher.coursework = payload.items || [];
+        setText('#tc-work-pill', `${payload.total} item${payload.total === 1 ? '' : 's'}`);
+        if (!payload.items.length) {
+          list.innerHTML = lmsQuiet('No classwork yet.', 'Create an assignment from the composer.');
+          return;
+        }
+        list.innerHTML = payload.items.map(cw => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              ${lmsStatusPill(cw.status)}
+              <strong>${escapeHtml(cw.title)}</strong>
+              <span class="item-subtitle">${escapeHtml(cw.type.replace('_', ' '))}${cw.maxMarks != null ? ` · ${cw.maxMarks} pts` : ''}${cw.rubric ? ' · rubric' : ''}</span>
+              <span class="lms-spacer item-subtitle">${cw.dueAt ? `Due ${lmsWhen(cw.dueAt)}` : 'No due date'}</span>
+            </div>
+            ${cw.body ? `<p class="lms-item-body">${escapeHtml(cw.body)}</p>` : ''}
+            <div class="lms-item-actions">
+              ${cw.submissionCount != null ? `<span class="pill">${cw.submissionCount} turned in · ${cw.gradedCount} returned</span>` : ''}
+              ${cw.submissionCount != null ? `<button class="btn primary" data-tc-act="cw-subs" data-id="${cw.id}">Grade submissions</button>` : ''}
+              ${cw.status !== 'published' ? `<button class="btn" data-tc-act="cw-publish" data-id="${cw.id}">Publish</button>` : ''}
+              <button class="btn" data-tc-act="cw-duplicate" data-id="${cw.id}">Duplicate</button>
+              ${cw.status !== 'archived' ? `<button class="btn" data-tc-act="cw-archive" data-id="${cw.id}">Archive</button>` : ''}
+              <button class="btn" data-tc-act="cw-delete" data-id="${cw.id}">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        setText('#tc-work-pill', 'Offline');
+        list.innerHTML = lmsQuiet('Could not load classwork.', lmsError(error));
+      }
+    }
+
+    async function tcCreateWork(publish) {
+      const errorEl = document.querySelector('#tc-cw-error');
+      errorEl.textContent = '';
+      const title = document.querySelector('#tc-cw-title').value.trim();
+      if (!title) { errorEl.textContent = 'A title is required.'; return; }
+      const dueRaw = document.querySelector('#tc-cw-due').value;
+      const points = document.querySelector('#tc-cw-points').value;
+      const rubricId = document.querySelector('#tc-cw-rubric').value;
+      const rubric = rubricId ? lms.teacher.rubrics.find(r => r.id === rubricId)?.criteria : undefined;
+      try {
+        await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/coursework`, {
+          method: 'POST',
+          body: {
+            type: document.querySelector('#tc-cw-type').value,
+            title,
+            body: document.querySelector('#tc-cw-body').value.trim() || undefined,
+            dueAt: dueRaw ? new Date(dueRaw).toISOString() : undefined,
+            maxMarks: points === '' ? undefined : Number(points),
+            allowLate: document.querySelector('#tc-cw-late').checked,
+            rubric,
+            publish,
+          },
+        });
+        for (const id of ['tc-cw-title', 'tc-cw-body', 'tc-cw-due', 'tc-cw-points']) {
+          document.querySelector(`#${id}`).value = '';
+        }
+        tcLoadWork();
+      } catch (error) {
+        errorEl.textContent = lmsError(error);
+      }
+    }
+
+    async function tcShowSubmissions(courseworkId) {
+      const cw = lms.teacher.coursework.find(x => x.id === courseworkId);
+      lms.teacher.subsFor = cw;
+      const panel = document.querySelector('#tc-subs-panel');
+      panel.classList.remove('hidden');
+      setText('#tc-subs-title', `Submissions — ${cw.title}`);
+      const list = document.querySelector('#tc-subs-list');
+      try {
+        const payload = await apiJson(`/api/classroom/coursework/${courseworkId}/submissions`);
+        if (!payload.items.length) {
+          list.innerHTML = lmsQuiet('No submissions yet.', 'Student work appears here once turned in.');
+          return;
+        }
+        list.innerHTML = payload.items.map(s => {
+          const rubricInputs = (cw.rubric || []).map((c, i) => `
+            <div class="lms-inline">
+              <span style="flex:1;font-size:13px">${escapeHtml(c.criterion)} <em class="item-subtitle">/ ${c.max_points}</em></span>
+              <input class="field" style="max-width:90px" type="number" min="0" max="${c.max_points}"
+                data-rubric-input data-criterion="${escapeHtml(c.criterion)}"
+                value="${s.grade?.rubricScores?.find(r => r.criterion === c.criterion)?.points ?? ''}" />
+            </div>`).join('');
+          return `
+          <div class="lms-item" data-submission="${s.id}">
+            <div class="lms-item-head">
+              <strong>${escapeHtml(s.studentName)}</strong>
+              ${lmsStatusPill(s.status)}
+              ${s.isLate ? '<span class="pill late">Late</span>' : ''}
+              <span class="pill">Attempt ${s.attempt}</span>
+              <span class="lms-spacer item-subtitle">${s.submittedAt ? lmsWhen(s.submittedAt) : ''}</span>
+            </div>
+            <p class="lms-item-body">${escapeHtml(s.textAnswer || '(no text answer)')}</p>
+            ${s.grade ? `<p class="item-subtitle" style="margin-top:6px">Current grade: <strong>${s.grade.score}${s.grade.maxMarks != null ? `/${s.grade.maxMarks}` : ''}</strong>${s.grade.isRegrade ? ' (regrade)' : ''}</p>` : ''}
+            <div class="lms-grade-form">
+              ${rubricInputs}
+              <div class="lms-inline">
+                <div class="field-group"><label>Score${cw.maxMarks != null ? ` / ${cw.maxMarks}` : ''}</label>
+                  <input class="field" type="number" min="0" data-grade-score value="${s.grade?.score ?? ''}" /></div>
+                <div class="field-group"><label>Comment (student sees)</label>
+                  <input class="field" data-grade-comment value="${escapeHtml(s.grade?.comment ?? '')}" /></div>
+              </div>
+              <div class="lms-inline">
+                <label class="lms-check"><input type="checkbox" data-grade-return checked /> Return to student</label>
+                <button class="btn primary" data-tc-act="grade" data-id="${s.id}">Save grade</button>
+                <button class="btn" data-tc-act="sub-return" data-id="${s.id}">Return without grade</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+      } catch (error) {
+        list.innerHTML = lmsQuiet('Could not load submissions.', lmsError(error));
+      }
+    }
+
+    async function tcGrade(submissionId, item) {
+      const score = item.querySelector('[data-grade-score]').value;
+      if (score === '') return;
+      const rubricScores = [...item.querySelectorAll('[data-rubric-input]')]
+        .filter(i => i.value !== '')
+        .map(i => ({ criterion: i.dataset.criterion, points: Number(i.value) }));
+      await apiJson(`/api/classroom/submissions/${submissionId}/grade`, {
+        method: 'POST',
+        body: {
+          score: Number(score),
+          comment: item.querySelector('[data-grade-comment]').value.trim() || undefined,
+          rubricScores: rubricScores.length ? rubricScores : undefined,
+          returnToStudent: item.querySelector('[data-grade-return]').checked,
+        },
+      });
+      tcShowSubmissions(lms.teacher.subsFor.id);
+      tcLoadWork();
+    }
+
+    // ── Teacher: people, guardians, gradebook, rubrics ───────────────────────
+
+    async function tcLoadRoster() {
+      const list = document.querySelector('#tc-roster-list');
+      const c = lms.teacher.active;
+      document.querySelector('#tc-join-code').textContent = c.joinCode;
+      document.querySelector('#tc-code-toggle-btn').textContent =
+        c.joinCodeEnabled === false ? 'Enable joining' : 'Disable joining';
+      try {
+        const payload = await apiJson(`/api/classroom/classes/${c.id}/roster`);
+        lms.teacher.roster = payload.items || [];
+        setText('#tc-roster-pill', `${payload.total} enrolled`);
+        list.innerHTML = payload.items.length ? payload.items.map(s => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              <strong>${escapeHtml(s.name)}</strong>
+              <span class="item-subtitle">${escapeHtml(s.email || '')}</span>
+              <span class="lms-spacer"></span>
+              <button class="btn" data-tc-act="roster-remove" data-id="${s.studentId}">Remove</button>
+            </div>
+          </div>`).join('') : lmsQuiet('No students yet.', `Share the join code ${c.joinCode} with your class.`);
+      } catch (error) {
+        list.innerHTML = lmsQuiet('Could not load the roster.', lmsError(error));
+      }
+    }
+
+    async function tcLoadGuardianPanel() {
+      const select = document.querySelector('#tc-guardian-student');
+      try {
+        const payload = await apiJson('/api/classroom/students');
+        select.innerHTML = payload.students.map(s =>
+          `<option value="${s.studentId}">${escapeHtml(s.name)}</option>`).join('');
+        tcLoadGuardians();
+      } catch { /* panel stays empty */ }
+    }
+
+    async function tcLoadGuardians() {
+      const studentId = document.querySelector('#tc-guardian-student').value;
+      const list = document.querySelector('#tc-guardians-list');
+      if (!studentId) return;
+      try {
+        const payload = await apiJson(`/api/classroom/students/${studentId}/guardians`);
+        list.innerHTML = payload.items.length ? payload.items.map(g => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              <strong>${escapeHtml(g.guardianEmail)}</strong>
+              <span class="pill ok">${escapeHtml(g.status)}</span>
+              <span class="lms-spacer"></span>
+              <button class="btn" data-tc-act="guardian-remove" data-id="${g.id}">Remove</button>
+            </div>
+          </div>`).join('') : lmsQuiet('No guardians linked.', 'Link a guardian email to this student.');
+      } catch (error) {
+        list.innerHTML = lmsQuiet('Could not load guardians.', lmsError(error));
+      }
+    }
+
+    async function tcLoadGradebook() {
+      const body = document.querySelector('#tc-gradebook-body');
+      try {
+        const book = await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/gradebook`);
+        setText('#tc-gradebook-pill', book.class_average_percent != null
+          ? `Class average ${book.class_average_percent}%` : 'No returned grades yet');
+        if (!book.columns.length) {
+          body.innerHTML = lmsQuiet('No gradeable classwork.', 'Publish an assignment to start the gradebook.');
+          return;
+        }
+        body.innerHTML = `<div class="lms-table-wrap"><table class="lms-table">
+          <thead><tr><th>Student</th>${book.columns.map(c =>
+            `<th>${escapeHtml(c.title)}${c.max_marks != null ? ` <em>/${c.max_marks}</em>` : ''}</th>`).join('')}<th>Avg %</th></tr></thead>
+          <tbody>${book.rows.map(r => `<tr>
+            <td>${escapeHtml(r.student_name)}</td>
+            ${book.columns.map(c => {
+              const cell = r.cells[c.coursework_id];
+              if (cell.score != null) return `<td>${cell.score}${cell.returned ? '' : ' <em>(unreturned)</em>'}</td>`;
+              return `<td><em>${escapeHtml(cell.status)}</em></td>`;
+            }).join('')}
+            <td><strong>${r.average_percent ?? '—'}</strong></td>
+          </tr>`).join('')}</tbody></table></div>`;
+      } catch (error) {
+        setText('#tc-gradebook-pill', 'Offline');
+        body.innerHTML = lmsQuiet('Could not load the gradebook.', lmsError(error));
+      }
+    }
+
+    function tcRubricRow(criterion = '', points = '') {
+      const row = document.createElement('div');
+      row.className = 'lms-rubric-row';
+      row.innerHTML = `
+        <input class="field" placeholder="Criterion (e.g. Clarity)" data-rubric-name value="${escapeHtml(criterion)}" />
+        <input class="field" type="number" min="0" placeholder="Points" data-rubric-points value="${points}" />`;
+      return row;
+    }
+
+    async function tcLoadRubrics() {
+      const container = document.querySelector('#tc-rubric-criteria');
+      if (!container.children.length) {
+        container.append(tcRubricRow('Accuracy', 5), tcRubricRow('Clarity', 3));
+      }
+      const list = document.querySelector('#tc-rubrics-list');
+      try {
+        const payload = await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/rubrics`);
+        lms.teacher.rubrics = payload.items || [];
+        setText('#tc-rubrics-pill', `${payload.items.length} rubric${payload.items.length === 1 ? '' : 's'}`);
+        document.querySelector('#tc-cw-rubric').innerHTML = '<option value="">None</option>'
+          + lms.teacher.rubrics.map(r => `<option value="${r.id}">${escapeHtml(r.title)} (${r.maxPoints} pts)</option>`).join('');
+        list.innerHTML = payload.items.length ? payload.items.map(r => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              <strong>${escapeHtml(r.title)}</strong>
+              <span class="pill">${r.maxPoints} pts</span>
+              <span class="lms-spacer"></span>
+              <button class="btn" data-tc-act="rubric-delete" data-id="${r.id}">Delete</button>
+            </div>
+            <p class="lms-item-body">${r.criteria.map(c => `${escapeHtml(c.criterion)} (${c.max_points})`).join(' · ')}</p>
+          </div>`).join('') : lmsQuiet('No rubrics yet.', 'Build one once, attach it to any assignment.');
+      } catch (error) {
+        setText('#tc-rubrics-pill', 'Offline');
+        list.innerHTML = lmsQuiet('Could not load rubrics.', lmsError(error));
+      }
+    }
+
+    async function tcCreateRubric() {
+      const errorEl = document.querySelector('#tc-rubric-error');
+      errorEl.textContent = '';
+      const title = document.querySelector('#tc-rubric-title').value.trim();
+      const criteria = [...document.querySelectorAll('#tc-rubric-criteria .lms-rubric-row')]
+        .map(row => ({
+          criterion: row.querySelector('[data-rubric-name]').value.trim(),
+          max_points: Number(row.querySelector('[data-rubric-points]').value),
+        }))
+        .filter(c => c.criterion);
+      try {
+        await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/rubrics`, {
+          method: 'POST', body: { title, criteria },
+        });
+        document.querySelector('#tc-rubric-title').value = '';
+        document.querySelector('#tc-rubric-criteria').innerHTML = '';
+        tcLoadRubrics();
+      } catch (error) {
+        errorEl.textContent = lmsError(error);
+      }
+    }
+
+    // Teacher event wiring — static controls
+    document.querySelector('#tc-refresh-btn').addEventListener('click', () => tcLoadClasses());
+    document.querySelector('#tc-archived-btn').addEventListener('click', (e) => {
+      lms.teacher.showArchived = !lms.teacher.showArchived;
+      e.target.textContent = lms.teacher.showArchived ? 'Show active' : 'Show archived';
+      tcLoadClasses();
+    });
+    document.querySelector('#tc-new-btn').addEventListener('click', () =>
+      document.querySelector('#tc-create-panel').classList.toggle('hidden'));
+    document.querySelector('#tc-create-cancel-btn').addEventListener('click', () =>
+      document.querySelector('#tc-create-panel').classList.add('hidden'));
+    document.querySelector('#tc-create-btn').addEventListener('click', async () => {
+      const errorEl = document.querySelector('#tc-create-error');
+      errorEl.textContent = '';
+      try {
+        await apiJson('/api/classroom/classes', {
+          method: 'POST',
+          body: {
+            name: document.querySelector('#tc-new-name').value.trim(),
+            subject: document.querySelector('#tc-new-subject').value.trim() || undefined,
+            section: document.querySelector('#tc-new-section').value.trim() || undefined,
+            room: document.querySelector('#tc-new-room').value.trim() || undefined,
+            grade: document.querySelector('#tc-new-grade').value.trim() || undefined,
+          },
+        });
+        for (const id of ['tc-new-name', 'tc-new-subject', 'tc-new-section', 'tc-new-room', 'tc-new-grade']) {
+          document.querySelector(`#${id}`).value = '';
+        }
+        document.querySelector('#tc-create-panel').classList.add('hidden');
+        tcLoadClasses();
+      } catch (error) { errorEl.textContent = lmsError(error); }
+    });
+    document.querySelector('#tc-back-btn').addEventListener('click', () => {
+      document.querySelector('#tc-class-view').classList.add('hidden');
+      document.querySelector('#tc-home').classList.remove('hidden');
+      tcLoadClasses();
+    });
+    document.querySelector('#tc-tabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('[data-tc-tab]');
+      if (tab) tcShowTab(tab.dataset.tcTab);
+    });
+    document.querySelector('#tc-post-btn').addEventListener('click', () => tcCreatePost('published'));
+    document.querySelector('#tc-post-draft-btn').addEventListener('click', () => tcCreatePost('draft'));
+    document.querySelector('#tc-cw-publish-btn').addEventListener('click', () => tcCreateWork(true));
+    document.querySelector('#tc-cw-draft-btn').addEventListener('click', () => tcCreateWork(false));
+    document.querySelector('#tc-subs-close-btn').addEventListener('click', () =>
+      document.querySelector('#tc-subs-panel').classList.add('hidden'));
+    document.querySelector('#tc-code-regen-btn').addEventListener('click', async () => {
+      const updated = await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/regenerate-code`, { method: 'POST' });
+      lms.teacher.active = { ...lms.teacher.active, ...updated };
+      tcLoadRoster();
+    });
+    document.querySelector('#tc-code-toggle-btn').addEventListener('click', async () => {
+      const enable = lms.teacher.active.joinCodeEnabled === false;
+      const updated = await apiJson(
+        `/api/classroom/classes/${lms.teacher.active.id}/join-code/${enable ? 'enable' : 'disable'}`,
+        { method: 'POST' },
+      );
+      lms.teacher.active = { ...lms.teacher.active, ...updated };
+      tcLoadRoster();
+    });
+    document.querySelector('#tc-guardian-student').addEventListener('change', tcLoadGuardians);
+    document.querySelector('#tc-guardian-add-btn').addEventListener('click', async () => {
+      const studentId = document.querySelector('#tc-guardian-student').value;
+      const email = document.querySelector('#tc-guardian-email').value.trim();
+      if (!studentId || !email) return;
+      try {
+        await apiJson(`/api/classroom/students/${studentId}/guardians`, { method: 'POST', body: { email } });
+        document.querySelector('#tc-guardian-email').value = '';
+        tcLoadGuardians();
+      } catch (error) { alert(lmsError(error)); }
+    });
+    document.querySelector('#tc-gradebook-csv-btn').addEventListener('click', () =>
+      window.open(`/api/classroom/classes/${lms.teacher.active.id}/gradebook/export`, '_blank'));
+    document.querySelector('#tc-rubric-add-row-btn').addEventListener('click', () =>
+      document.querySelector('#tc-rubric-criteria').append(tcRubricRow()));
+    document.querySelector('#tc-rubric-create-btn').addEventListener('click', tcCreateRubric);
+
+    // Teacher event wiring — delegated per-item actions
+    document.querySelector('#teacher-classes').addEventListener('click', async (e) => {
+      const button = e.target.closest('[data-tc-act]');
+      if (!button) return;
+      const { tcAct: act, id } = button.dataset;
+      try {
+        if (act === 'open') return tcOpenClass(id);
+        if (act === 'archive' || act === 'unarchive') {
+          await apiJson(`/api/classroom/classes/${id}/${act}`, { method: 'POST' });
+          return tcLoadClasses();
+        }
+        if (act === 'post-publish') { await apiJson(`/api/classroom/announcements/${id}/publish`, { method: 'POST' }); return tcLoadStream(); }
+        if (act === 'post-pin') {
+          await apiJson(`/api/classroom/announcements/${id}/pin`, { method: 'POST', body: { pinned: button.dataset.pinned === 'true' } });
+          return tcLoadStream();
+        }
+        if (act === 'post-delete') { await apiJson(`/api/classroom/announcements/${id}`, { method: 'DELETE' }); return tcLoadStream(); }
+        if (act === 'cw-subs') return tcShowSubmissions(id);
+        if (act === 'cw-publish') { await apiJson(`/api/classroom/coursework/${id}/publish`, { method: 'POST' }); return tcLoadWork(); }
+        if (act === 'cw-duplicate') { await apiJson(`/api/classroom/coursework/${id}/duplicate`, { method: 'POST' }); return tcLoadWork(); }
+        if (act === 'cw-archive') { await apiJson(`/api/classroom/coursework/${id}/archive`, { method: 'POST' }); return tcLoadWork(); }
+        if (act === 'cw-delete') { await apiJson(`/api/classroom/coursework/${id}`, { method: 'DELETE' }); return tcLoadWork(); }
+        if (act === 'grade') return tcGrade(id, button.closest('[data-submission]'));
+        if (act === 'sub-return') {
+          await apiJson(`/api/classroom/submissions/${id}/return`, { method: 'POST' });
+          return tcShowSubmissions(lms.teacher.subsFor.id);
+        }
+        if (act === 'roster-remove') {
+          await apiJson(`/api/classroom/classes/${lms.teacher.active.id}/roster/${id}`, { method: 'DELETE' });
+          return tcLoadRoster();
+        }
+        if (act === 'guardian-remove') { await apiJson(`/api/classroom/guardians/${id}`, { method: 'DELETE' }); return tcLoadGuardians(); }
+        if (act === 'rubric-delete') { await apiJson(`/api/classroom/rubrics/${id}`, { method: 'DELETE' }); return tcLoadRubrics(); }
+      } catch (error) {
+        alert(lmsError(error));
+      }
+    });
+
+    // ── Student: classes ─────────────────────────────────────────────────────
+
+    async function scInit(force = false) {
+      if (lms.loadedOnce.student && !force) return;
+      lms.loadedOnce.student = true;
+      scLoadClasses();
+      scLoadCalendar();
+    }
+
+    async function scLoadClasses() {
+      const list = document.querySelector('#sc-class-list');
+      try {
+        const payload = await apiJson(`/api/classroom/enrolled?studentId=${state.user.userId}`);
+        lms.student.classes = payload.items || [];
+        if (!payload.items.length) {
+          list.innerHTML = lmsQuiet('No classes yet.', 'Ask your teacher for a class code.');
+          return;
+        }
+        list.innerHTML = payload.items.map(c => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              <span class="lms-color-dot" style="background:${escapeHtml(c.color)}"></span>
+              <strong>${escapeHtml(c.name)}</strong>
+              <span class="item-subtitle">${escapeHtml([c.subject, c.section].filter(Boolean).join(' · '))}</span>
+              <span class="lms-spacer"></span>
+              <button class="btn primary" data-sc-act="open" data-id="${c.id}">Open</button>
+            </div>
+          </div>`).join('');
+      } catch (error) {
+        list.innerHTML = lmsQuiet('Classroom service unavailable.', lmsError(error));
+      }
+    }
+
+    async function scLoadCalendar() {
+      const list = document.querySelector('#sc-calendar');
+      try {
+        const start = new Date();
+        const end = new Date(start.getTime() + 30 * 24 * 3600 * 1000);
+        const payload = await apiJson(
+          `/api/classroom/calendar?role=student&userId=${state.user.userId}&start=${start.toISOString()}&end=${end.toISOString()}`);
+        setText('#sc-calendar-pill', `${payload.total} due`);
+        if (!payload.total) {
+          list.innerHTML = lmsQuiet('Nothing due.', 'Assignments with due dates appear here.');
+          return;
+        }
+        list.innerHTML = payload.days.map(day => `
+          <div class="lms-item">
+            <div class="lms-item-head"><strong>${new Date(`${day.date}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</strong></div>
+            ${day.events.map(ev => `
+              <p class="lms-item-body">${escapeHtml(ev.title)} — <em>${escapeHtml(ev.classroom_name)}</em>${ev.max_marks != null ? ` · ${ev.max_marks} pts` : ''} · due ${lmsWhen(ev.due_at)}</p>`).join('')}
+          </div>`).join('');
+      } catch (error) {
+        setText('#sc-calendar-pill', 'Offline');
+        list.innerHTML = lmsQuiet('Could not load the calendar.', lmsError(error));
+      }
+    }
+
+    function scOpenClass(id) {
+      const c = lms.student.classes.find(x => x.id === id);
+      if (!c) return;
+      lms.student.active = c;
+      document.querySelector('#sc-home').classList.add('hidden');
+      document.querySelector('#sc-class-view').classList.remove('hidden');
+      document.querySelector('#sc-class-dot').style.background = c.color;
+      setText('#sc-class-name', c.name);
+      setText('#sc-class-meta', [c.subject, c.section].filter(Boolean).join(' · '));
+      scShowTab('stream');
+    }
+
+    function scShowTab(tab) {
+      lms.student.tab = tab;
+      document.querySelectorAll('#sc-tabs .lms-tab').forEach(b =>
+        b.classList.toggle('active', b.dataset.scTab === tab));
+      for (const name of ['stream', 'work', 'grades']) {
+        document.querySelector(`#sc-tab-${name}`).classList.toggle('hidden', name !== tab);
+      }
+      if (tab === 'stream') scLoadStream();
+      if (tab === 'work') scLoadWork();
+      if (tab === 'grades') scLoadGrades();
+    }
+
+    async function scLoadStream() {
+      const list = document.querySelector('#sc-stream-list');
+      try {
+        const payload = await apiJson(`/api/classroom/classes/${lms.student.active.id}/announcements?role=student`);
+        list.innerHTML = payload.items.length ? payload.items.map(a => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              ${a.isPinned ? '<span class="pill warn">Pinned</span>' : ''}
+              <strong>${escapeHtml(a.title || 'Announcement')}</strong>
+              <span class="lms-spacer item-subtitle">${lmsWhen(a.publishedAt || a.createdAt)}</span>
+            </div>
+            <p class="lms-item-body">${escapeHtml(a.body)}</p>
+          </div>`).join('') : lmsQuiet('No posts yet.', 'Announcements from your teacher appear here.');
+      } catch (error) {
+        list.innerHTML = lmsQuiet('Could not load the stream.', lmsError(error));
+      }
+    }
+
+    async function scLoadWork() {
+      const list = document.querySelector('#sc-work-list');
+      try {
+        const payload = await apiJson(
+          `/api/classroom/classes/${lms.student.active.id}/coursework?role=student&studentId=${state.user.userId}`);
+        lms.student.coursework = payload.items || [];
+        setText('#sc-work-pill', `${payload.total} item${payload.total === 1 ? '' : 's'}`);
+        if (!payload.items.length) {
+          list.innerHTML = lmsQuiet('No classwork yet.', 'Published assignments appear here.');
+          return;
+        }
+        list.innerHTML = payload.items.map(cw => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              ${cw.mySubmissionStatus ? lmsStatusPill(cw.mySubmissionStatus) : '<span class="pill warn">Assigned</span>'}
+              <strong>${escapeHtml(cw.title)}</strong>
+              <span class="item-subtitle">${cw.maxMarks != null ? `${cw.maxMarks} pts` : ''}</span>
+              <span class="lms-spacer item-subtitle">${cw.dueAt ? `Due ${lmsWhen(cw.dueAt)}` : 'No due date'}</span>
+            </div>
+            <div class="lms-item-actions">
+              <button class="btn primary" data-sc-act="cw-open" data-id="${cw.id}">Open</button>
+            </div>
+            <div class="hidden" data-cw-detail="${cw.id}"></div>
+          </div>`).join('');
+      } catch (error) {
+        setText('#sc-work-pill', 'Offline');
+        list.innerHTML = lmsQuiet('Could not load classwork.', lmsError(error));
+      }
+    }
+
+    async function scOpenWork(courseworkId) {
+      const cw = lms.student.coursework.find(x => x.id === courseworkId);
+      const holder = document.querySelector(`[data-cw-detail="${courseworkId}"]`);
+      if (!holder.classList.contains('hidden')) { holder.classList.add('hidden'); return; }
+      holder.classList.remove('hidden');
+      holder.innerHTML = '<p class="item-subtitle">Loading…</p>';
+      try {
+        const payload = await apiJson(
+          `/api/classroom/coursework/${courseworkId}/submission?studentId=${state.user.userId}`);
+        const s = payload.submission;
+        const grade = s?.grade;
+        const canResubmit = Boolean(s && ['submitted', 'returned', 'withdrawn'].includes(s.status));
+        holder.innerHTML = `
+          ${cw.body ? `<p class="lms-item-body">${escapeHtml(cw.body)}</p>` : ''}
+          ${cw.rubric ? `<p class="item-subtitle" style="margin-top:6px">Rubric: ${cw.rubric.map(c => `${escapeHtml(c.criterion)} (${c.max_points})`).join(' · ')}</p>` : ''}
+          ${s ? `<p class="item-subtitle" style="margin-top:6px">Your submission (attempt ${s.attempt}${s.isLate ? ', late' : ''}): ${escapeHtml(s.textAnswer || '')}</p>` : ''}
+          ${grade && s.status === 'returned' ? `
+            <div class="lms-item" style="margin-top:8px">
+              <div class="lms-item-head"><span class="pill ok">Grade</span>
+                <strong>${grade.score}${grade.maxMarks != null ? `/${grade.maxMarks}` : ''}</strong></div>
+              ${grade.rubricScores ? `<p class="item-subtitle">${grade.rubricScores.map(r => `${escapeHtml(r.criterion)}: ${r.points}`).join(' · ')}</p>` : ''}
+              ${grade.comment ? `<p class="lms-item-body">${escapeHtml(grade.comment)}</p>` : ''}
+            </div>` : ''}
+          <div class="lms-grade-form">
+            <div class="field-group"><label>Your answer</label>
+              <textarea class="field" rows="3" data-sc-answer placeholder="Type your answer"></textarea></div>
+            <div class="lms-inline">
+              <button class="btn primary" data-sc-act="${canResubmit ? 'resubmit' : 'submit'}" data-id="${courseworkId}">
+                ${canResubmit ? 'Resubmit' : 'Turn in'}</button>
+              ${s && s.status === 'submitted' ? `<button class="btn" data-sc-act="withdraw" data-id="${courseworkId}">Withdraw</button>` : ''}
+            </div>
+          </div>`;
+      } catch (error) {
+        holder.innerHTML = `<p class="item-subtitle">${lmsError(error)}</p>`;
+      }
+    }
+
+    async function scLoadGrades() {
+      const list = document.querySelector('#sc-grades-list');
+      try {
+        const payload = await apiJson(
+          `/api/classroom/classes/${lms.student.active.id}/grades?studentId=${state.user.userId}`);
+        const returned = payload.items.filter(s => s.status === 'returned' && s.grade);
+        list.innerHTML = returned.length ? returned.map(s => `
+          <div class="lms-item">
+            <div class="lms-item-head">
+              <strong>${escapeHtml(s.courseworkTitle)}</strong>
+              <span class="pill ok">${s.grade.score}${s.grade.maxMarks != null ? `/${s.grade.maxMarks}` : ''}</span>
+              ${s.isLate ? '<span class="pill late">Late</span>' : ''}
+              <span class="lms-spacer item-subtitle">${lmsWhen(s.grade.createdAt)}</span>
+            </div>
+            ${s.grade.comment ? `<p class="lms-item-body">${escapeHtml(s.grade.comment)}</p>` : ''}
+          </div>`).join('') : lmsQuiet('No returned grades yet.', 'Grades appear once your teacher returns work.');
+      } catch (error) {
+        list.innerHTML = lmsQuiet('Could not load grades.', lmsError(error));
+      }
+    }
+
+    // Student event wiring
+    document.querySelector('#sc-refresh-btn').addEventListener('click', () => { scLoadClasses(); scLoadCalendar(); });
+    document.querySelector('#sc-join-btn').addEventListener('click', async () => {
+      const input = document.querySelector('#sc-join-code');
+      const code = input.value.trim();
+      if (!code) return;
+      try {
+        await apiJson('/api/classroom/join', {
+          method: 'POST', body: { code, studentId: state.user.userId },
+        });
+        input.value = '';
+        setText('#sc-join-pill', 'Joined!');
+        scLoadClasses(); scLoadCalendar();
+      } catch (error) {
+        setText('#sc-join-pill', 'Failed');
+        alert(lmsError(error));
+      }
+    });
+    document.querySelector('#sc-back-btn').addEventListener('click', () => {
+      document.querySelector('#sc-class-view').classList.add('hidden');
+      document.querySelector('#sc-home').classList.remove('hidden');
+      scLoadCalendar();
+    });
+    document.querySelector('#sc-tabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('[data-sc-tab]');
+      if (tab) scShowTab(tab.dataset.scTab);
+    });
+    document.querySelector('#student-classes').addEventListener('click', async (e) => {
+      const button = e.target.closest('[data-sc-act]');
+      if (!button) return;
+      const { scAct: act, id } = button.dataset;
+      try {
+        if (act === 'open') return scOpenClass(id);
+        if (act === 'cw-open') return scOpenWork(id);
+        if (act === 'submit' || act === 'resubmit') {
+          const answer = button.closest('.lms-grade-form').querySelector('[data-sc-answer]').value.trim();
+          if (!answer) return alert('Type an answer first.');
+          await apiJson(`/api/classroom/coursework/${id}/${act}`, {
+            method: 'POST', body: { studentId: state.user.userId, textAnswer: answer },
+          });
+          scLoadWork();
+          return;
+        }
+        if (act === 'withdraw') {
+          await apiJson(`/api/classroom/coursework/${id}/withdraw`, {
+            method: 'POST', body: { studentId: state.user.userId },
+          });
+          scLoadWork();
+          return;
+        }
+      } catch (error) {
+        alert(lmsError(error));
+      }
+    });
+
+    // ── Parent: guardian summary ─────────────────────────────────────────────
+
+    async function parentLmsLoad(studentId) {
+      if (!studentId) return;
+      const pill = document.querySelector('#parent-lms-pill');
+      try {
+        const digest = await apiJson(`/api/classroom/students/${studentId}/summary`);
+        pill.textContent = `${digest.missing.length} missing · ${digest.upcoming.length} upcoming`;
+        const upcoming = document.querySelector('#parent-lms-upcoming');
+        upcoming.innerHTML = digest.upcoming.length ? digest.upcoming.map(e => `
+          <div class="lms-item"><div class="lms-item-head">
+            <span class="pill warn">Upcoming</span><strong>${escapeHtml(e.title)}</strong>
+            <span class="lms-spacer item-subtitle">${escapeHtml(e.classroom_name)} · due ${lmsWhen(e.due_at)}</span>
+          </div></div>`).join('') : lmsQuiet('Nothing upcoming.', 'Assignments with future due dates appear here.');
+        const missing = document.querySelector('#parent-lms-missing');
+        missing.innerHTML = digest.missing.length ? digest.missing.map(e => `
+          <div class="lms-item"><div class="lms-item-head">
+            <span class="pill late">Missing</span><strong>${escapeHtml(e.title)}</strong>
+            <span class="lms-spacer item-subtitle">${escapeHtml(e.classroom_name)}${e.due_at ? ` · was due ${lmsWhen(e.due_at)}` : ''}</span>
+          </div></div>`).join('') : lmsQuiet('Nothing missing.', 'Past-due work without a submission appears here.');
+        const grades = document.querySelector('#parent-lms-grades');
+        grades.innerHTML = digest.recent_grades.length ? digest.recent_grades.map(e => `
+          <div class="lms-item"><div class="lms-item-head">
+            <span class="pill ok">${e.score}${e.max_marks != null ? `/${e.max_marks}` : ''}</span>
+            <strong>${escapeHtml(e.title)}</strong>
+            <span class="lms-spacer item-subtitle">${escapeHtml(e.classroom_name)}</span>
+          </div></div>`).join('') : lmsQuiet('No returned grades yet.', 'Grades appear once the teacher returns work.');
+      } catch (error) {
+        pill.textContent = 'Offline';
+        document.querySelector('#parent-lms-upcoming').innerHTML =
+          lmsQuiet('Classroom summary unavailable.', lmsError(error));
+      }
+    }
 
     // Auth removed: there is no session to restore. Boot straight into whichever
     // portal this process serves and probe /health only to drive the connection pill.

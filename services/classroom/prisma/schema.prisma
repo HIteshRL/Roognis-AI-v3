@@ -1,0 +1,188 @@
+// Classroom service — the LMS core ported from Roognis v2 (Google Classroom
+// parity layer): classes, enrollment, stream, coursework, submissions with
+// append-only grades, rubrics, guardians.
+//
+// Auth removed platform-wide: teacherId/studentId columns here are *data*
+// (who a row is about), not identity — nothing authenticates the caller.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["classroom_db"]
+}
+
+model Classroom {
+  id              String    @id @default(uuid()) @db.Uuid
+  teacherId       String    @map("teacher_id") @db.Uuid
+  name            String    @db.VarChar(120)
+  subject         String?   @db.VarChar(80)
+  section         String?   @db.VarChar(40)
+  room            String?   @db.VarChar(40)
+  grade           String?   @db.VarChar(20)
+  description     String?
+  color           String    @default("#1967d2") @db.VarChar(9)
+  joinCode        String    @unique @map("join_code") @db.VarChar(8)
+  joinCodeEnabled Boolean   @default(true) @map("join_code_enabled")
+  isArchived      Boolean   @default(false) @map("is_archived")
+  isDeleted       Boolean   @default(false) @map("is_deleted")
+  deletedAt       DateTime? @map("deleted_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  enrollments   Enrollment[]
+  announcements Announcement[]
+  coursework    Coursework[]
+  rubrics       Rubric[]
+
+  @@index([teacherId, isArchived])
+  @@map("classrooms")
+  @@schema("classroom_db")
+}
+
+model Enrollment {
+  id          String   @id @default(uuid()) @db.Uuid
+  classroomId String   @map("classroom_id") @db.Uuid
+  studentId   String   @map("student_id") @db.Uuid
+  status      String   @default("active") @db.VarChar(20)
+  joinedAt    DateTime @default(now()) @map("joined_at")
+
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@unique([classroomId, studentId])
+  @@index([studentId])
+  @@map("enrollments")
+  @@schema("classroom_db")
+}
+
+model Announcement {
+  id           String    @id @default(uuid()) @db.Uuid
+  classroomId  String    @map("classroom_id") @db.Uuid
+  authorId     String    @map("author_id") @db.Uuid
+  title        String?   @db.VarChar(200)
+  body         String
+  attachments  Json      @default("[]")
+  status       String    @default("published") @db.VarChar(20)
+  scheduledFor DateTime? @map("scheduled_for")
+  isPinned     Boolean   @default(false) @map("is_pinned")
+  publishedAt  DateTime? @map("published_at")
+  isDeleted    Boolean   @default(false) @map("is_deleted")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@index([classroomId, status, isPinned])
+  @@map("announcements")
+  @@schema("classroom_db")
+}
+
+model Coursework {
+  id          String    @id @default(uuid()) @db.Uuid
+  classroomId String    @map("classroom_id") @db.Uuid
+  authorId    String    @map("author_id") @db.Uuid
+  type        String    @db.VarChar(20)
+  title       String    @db.VarChar(200)
+  body        String?
+  status      String    @default("draft") @db.VarChar(20)
+  scheduledAt DateTime? @map("scheduled_at")
+  publishedAt DateTime? @map("published_at")
+  dueAt       DateTime? @map("due_at")
+  allowLate   Boolean   @default(true) @map("allow_late")
+  maxMarks    Float?    @map("max_marks")
+  // [{criterion, description, max_points}] — copied from a Rubric on attach,
+  // or authored inline. Grading stores per-criterion points in Grade.rubricScores.
+  rubric      Json?
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  classroom   Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([classroomId, status, dueAt])
+  @@map("coursework")
+  @@schema("classroom_db")
+}
+
+model Submission {
+  id           String    @id @default(uuid()) @db.Uuid
+  courseworkId String    @map("coursework_id") @db.Uuid
+  studentId    String    @map("student_id") @db.Uuid
+  status       String    @default("draft") @db.VarChar(20)
+  textAnswer   String?   @map("text_answer")
+  attempt      Int       @default(1)
+  isLate       Boolean   @default(false) @map("is_late")
+  submittedAt  DateTime? @map("submitted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  coursework Coursework @relation(fields: [courseworkId], references: [id], onDelete: Cascade)
+  grades     Grade[]
+
+  @@unique([courseworkId, studentId])
+  @@index([studentId])
+  @@map("submissions")
+  @@schema("classroom_db")
+}
+
+// Append-only: a regrade adds a row and the latest one wins, so grade history
+// stays auditable (same rule as v2).
+model Grade {
+  id              String   @id @default(uuid()) @db.Uuid
+  submissionId    String   @map("submission_id") @db.Uuid
+  graderId        String?  @map("grader_id") @db.Uuid
+  score           Float
+  maxMarks        Float?   @map("max_marks")
+  rubricScores    Json?    @map("rubric_scores")
+  comment         String?
+  privateFeedback String?  @map("private_feedback")
+  isReturned      Boolean  @default(false) @map("is_returned")
+  isRegrade       Boolean  @default(false) @map("is_regrade")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId, createdAt])
+  @@map("grades")
+  @@schema("classroom_db")
+}
+
+model Rubric {
+  id          String   @id @default(uuid()) @db.Uuid
+  classroomId String   @map("classroom_id") @db.Uuid
+  teacherId   String   @map("teacher_id") @db.Uuid
+  title       String   @db.VarChar(200)
+  criteria    Json     @default("[]")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@index([classroomId])
+  @@map("rubrics")
+  @@schema("classroom_db")
+}
+
+// v2 kept one row as both the invitation (pending+token) and the accepted link.
+// With auth gone there is no guardian account to accept, so links are active on
+// creation and the token flow is dropped.
+model GuardianLink {
+  id            String   @id @default(uuid()) @db.Uuid
+  studentId     String   @map("student_id") @db.Uuid
+  guardianEmail String   @map("guardian_email") @db.VarChar(200)
+  status        String   @default("active") @db.VarChar(20)
+  invitedBy     String?  @map("invited_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([studentId])
+  @@map("guardian_links")
+  @@schema("classroom_db")
+}
