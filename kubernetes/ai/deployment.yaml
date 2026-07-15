@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai
+  namespace: roognis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai
+  template:
+    metadata:
+      labels:
+        app: ai
+    spec:
+      initContainers:
+        - name: db-migrate
+          image: roognis/ai:latest
+          command: ["sh", "-c", "[ -f prisma/schema.prisma ] && npx prisma db push --schema=prisma/schema.prisma || true"]
+          envFrom:
+            - secretRef:
+                name: ai-secrets
+      containers:
+        - name: ai
+          image: roognis/ai:latest
+          command: ["node", "server.js"]
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - secretRef:
+                name: ai-secrets
+          env:
+            - name: PORT
+              value: "3002"
+            - name: NODE_ENV
+              value: production
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"

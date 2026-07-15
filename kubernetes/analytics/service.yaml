@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics
+  namespace: roognis
+spec:
+  selector:
+    app: analytics
+  ports:
+    - port: 3004
+      targetPort: 3004
+  type: ClusterIP

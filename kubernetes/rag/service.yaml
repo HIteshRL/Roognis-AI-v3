@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag
+  namespace: roognis
+spec:
+  selector:
+    app: rag
+  ports:
+    - port: 3003
+      targetPort: 3003
+  type: ClusterIP

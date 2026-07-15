@@ -1,0 +1,9 @@
+{
+  "name": "roognis-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Roognis AI — wired frontend MVP",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: roognis-ingress
+  namespace: roognis
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://roognis.ai,http://localhost:3000"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"   # SSE streaming support
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: roognis.ai  # Update to your domain
+      http:
+        paths:
+          - path: /api/ai
+            pathType: Prefix
+            backend:
+              service:
+                name: ai
+                port:
+                  number: 3002
+          - path: /api/rag
+            pathType: Prefix
+            backend:
+              service:
+                name: rag
+                port:
+                  number: 3003
+          - path: /api/analytics
+            pathType: Prefix
+            backend:
+              service:
+                name: analytics
+                port:
+                  number: 3004
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000

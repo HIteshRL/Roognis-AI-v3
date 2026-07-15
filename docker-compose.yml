@@ -1,0 +1,204 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Roognis AI — Docker Compose (Local Development + Staging)
+# All services are ENV-var driven for zero-code cloud migration
+# ─────────────────────────────────────────────────────────────────────────────
+
+volumes:
+  postgres_data:
+  chroma_data:
+  ollama_models:
+  comfy_models:
+  file_storage:
+
+services:
+
+  # ── API Gateway ─────────────────────────────────────────────────────────────
+  traefik:
+    image: traefik:v2.11
+    ports:
+      - "80:80"
+      - "8080:8080"  # Dashboard
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+  # ── Databases ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: roognis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d roognis"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  chromadb:
+    profiles: ["local-ai"]
+    image: chromadb/chroma:latest
+    volumes:
+      - chroma_data:/chroma/chroma
+    restart: unless-stopped
+
+  # ── AI Layer ─────────────────────────────────────────────────────────────────
+  ollama:
+    profiles: ["local-ai"]
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_models:/root/.ollama
+      - ./scripts/ollama-init.sh:/ollama-init.sh:ro
+    entrypoint: ["/bin/sh", "/ollama-init.sh"]
+    healthcheck:
+      # Passes only after the RAG embedding model is pulled and ready.
+      test: ["CMD-SHELL", "ollama list 2>/dev/null | grep -q nomic-embed-text"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    restart: unless-stopped
+
+  comfyui:
+    profiles: ["local-ai"]
+    image: ghcr.io/ai-dock/comfyui:latest
+    ports:
+      - "8188:8188"
+    volumes:
+      - comfy_models:/opt/ComfyUI/models
+      - file_storage:/opt/ComfyUI/output
+    restart: unless-stopped
+
+  # ── Application Services ─────────────────────────────────────────────────────
+
+  # auth service removed — every service below is unauthenticated.
+
+  ai:
+    build: ./services/ai
+    command: >
+      sh -c "[ -f prisma/schema.prisma ] &&
+             npx prisma db push --schema=prisma/schema.prisma ||
+             true && node server.js"
+    environment:
+      DATABASE_URL: "postgresql://postgres:${DB_PASSWORD}@postgres:5432/roognis?schema=ai_db"
+      DEMO_SCHOOL_ID: ${DEMO_SCHOOL_ID:-00000000-0000-0000-0000-000000000001}
+      DEMO_STUDENT_ID: ${DEMO_STUDENT_ID:-00000000-0000-0000-0000-000000000002}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      IMAGE_PROVIDER: ${IMAGE_PROVIDER:-gemini}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_TEXT_MODEL: ${GEMINI_TEXT_MODEL:-gemini-3.1-flash-lite}
+      GEMINI_IMAGE_MODEL: ${GEMINI_IMAGE_MODEL:-gemini-3.1-flash-image}
+      VIDEO_PROVIDER: ${VIDEO_PROVIDER:-youtube}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      VIDEO_SEARCH_MAX_RESULTS: ${VIDEO_SEARCH_MAX_RESULTS:-5}
+      VIDEO_TRUSTED_CHANNELS: ${VIDEO_TRUSTED_CHANNELS:-}
+      OLLAMA_URL: "http://ollama:11434"
+      RAG_SERVICE_URL: "http://rag:3003"
+      ANALYTICS_URL: "http://analytics:3004"
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
+      COMFYUI_URL: "http://comfyui:8188"
+      FILE_STORAGE_PATH: /app/storage
+      PORT: 3002
+      NODE_ENV: production
+      # Local fallback providers remain available with:
+      # LLM_PROVIDER=ollama IMAGE_PROVIDER=comfyui docker-compose --profile local-ai up --build
+      # Cloud swap — set to use S3 instead of Docker volume
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+    volumes:
+      - file_storage:/app/storage
+      - ./seed-data:/app/seed-data:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rag:
+        condition: service_started
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ai.rule=PathPrefix(`/api/ai`)"
+      - "traefik.http.routers.ai.entrypoints=web"
+      - "traefik.http.services.ai.loadbalancer.server.port=3002"
+      - "traefik.http.routers.ai.middlewares=cors@file"
+    restart: unless-stopped
+
+  rag:
+    build: ./services/rag
+    environment:
+      DATABASE_URL: "postgresql://postgres:${DB_PASSWORD}@postgres:5432/roognis"
+      CHROMA_URL: "http://chromadb:8000"
+      OLLAMA_URL: "http://ollama:11434"
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      DEMO_SCHOOL_ID: ${DEMO_SCHOOL_ID:-00000000-0000-0000-0000-000000000001}
+      DEMO_TEACHER_ID: ${DEMO_TEACHER_ID:-00000000-0000-0000-0000-000000000003}
+      FILE_STORAGE_PATH: /app/storage
+      PORT: 3003
+      RAG_TEST_MODE: ${RAG_TEST_MODE:-true}
+      RAG_COLLECTION_PREFIX: ${RAG_COLLECTION_PREFIX:-school}
+      RAG_MAX_UPLOAD_MB: ${RAG_MAX_UPLOAD_MB:-50}
+      # Cloud swap — set to use Pinecone instead of ChromaDB
+      PINECONE_API_KEY: ${PINECONE_API_KEY:-}
+      PINECONE_ENV: ${PINECONE_ENV:-}
+    volumes:
+      - file_storage:/app/storage
+      - ./seed-data:/app/seed-data:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rag.rule=PathPrefix(`/api/rag`)"
+      - "traefik.http.routers.rag.entrypoints=web"
+      - "traefik.http.services.rag.loadbalancer.server.port=3003"
+      - "traefik.http.routers.rag.middlewares=cors@file"
+    restart: unless-stopped
+
+  analytics:
+    build: ./services/analytics
+    command: >
+      sh -c "[ -f prisma/schema.prisma ] &&
+             npx prisma db push --schema=prisma/schema.prisma ||
+             true && node server.js"
+    environment:
+      DATABASE_URL: "postgresql://postgres:${DB_PASSWORD}@postgres:5432/roognis?schema=analytics_db"
+      DEMO_SCHOOL_ID: ${DEMO_SCHOOL_ID:-00000000-0000-0000-0000-000000000001}
+      DEMO_STUDENT_ID: ${DEMO_STUDENT_ID:-00000000-0000-0000-0000-000000000002}
+      DEMO_TEACHER_ID: ${DEMO_TEACHER_ID:-00000000-0000-0000-0000-000000000003}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
+      PORT: 3004
+      NODE_ENV: production
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.analytics.rule=PathPrefix(`/api/analytics`)"
+      - "traefik.http.routers.analytics.entrypoints=web"
+      - "traefik.http.services.analytics.loadbalancer.server.port=3004"
+      - "traefik.http.routers.analytics.middlewares=cors@file"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost/api"
+      API_PROXY_TARGET: "http://traefik"
+      HOST: "0.0.0.0"
+      PORT: 3000
+      NODE_ENV: production
+    depends_on:
+      ai:
+        condition: service_started
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend.middlewares=cors@file"
+    restart: unless-stopped

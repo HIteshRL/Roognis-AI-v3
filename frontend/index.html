@@ -1,0 +1,4150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roognis</title>
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Surfaces */
+      --bg: #f2f5f1;
+      --surface: #ffffff;
+      --surface-2: #fafbf9;
+      --surface-3: #f2f5f1;
+      --soft: #eef4ef;
+
+      /* Glass (iOS-inspired translucency) */
+      --glass: rgba(255, 255, 255, 0.62);
+      --glass-strong: rgba(255, 255, 255, 0.80);
+      --glass-line: rgba(255, 255, 255, 0.75);
+      --glass-blur: saturate(180%) blur(24px);
+
+      /* Ink */
+      --ink: #1c2621;
+      --ink-soft: #39443e;
+      --muted: #65726b;
+      --on-accent: #ffffff;
+
+      /* Lines */
+      --line: #dce3dd;
+      --line-strong: #c5d2c9;
+
+      /* Greens */
+      --green: #3e7d5b;
+      --green-dark: #28553f;
+      --green-bright: #4f9b6f;
+      --green-tint: #e9f1eb;
+      --green-tint-2: #dbe8e0;
+
+      /* Warm shades */
+      --warm-deep: #9a5c22;
+      --warm-tint: #f8efe2;
+
+      --blue: #416fae;
+      --amber: #b8792a;
+      --red: #b85c52;
+
+      /* Status tones */
+      --tone-green-fg: #28553f;
+      --tone-green-bg: #e4eee7;
+      --tone-blue-fg: #284c7d;
+      --tone-blue-bg: #e7eef8;
+      --tone-amber-fg: #80511d;
+      --tone-amber-bg: #f8edda;
+      --tone-amber-line: #ead4b6;
+      --tone-red-fg: #7c3932;
+      --tone-red-bg: #f8e9e6;
+      --tone-flame-fg: #b85c1d;
+      --tone-flame-bg: #fff0d8;
+      --tone-flame-line: #f3d8ad;
+
+      /* Gradients */
+      --grad-accent: linear-gradient(135deg, var(--green-bright), var(--green-dark));
+      --grad-warm: linear-gradient(135deg, #d9944a, var(--warm-deep));
+      --grad-chat: linear-gradient(168deg, #f0f6f1 0%, #f6f4ee 52%, #f9f1e6 100%);
+      --grad-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+
+      --shadow: 0 16px 44px rgba(38, 49, 42, 0.08);
+      --shadow-lg: 0 32px 80px rgba(28, 38, 33, 0.16);
+      --radius: 8px;
+      --radius-lg: 16px;
+
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Inter, ui-sans-serif, system-ui, sans-serif;
+      font-synthesis-weight: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+
+      --bg: #0e1512;
+      --surface: #16201b;
+      --surface-2: #1a251f;
+      --surface-3: #121b16;
+      --soft: #1d2a23;
+
+      --glass: rgba(30, 42, 35, 0.55);
+      --glass-strong: rgba(24, 34, 28, 0.78);
+      --glass-line: rgba(255, 255, 255, 0.10);
+      --glass-blur: saturate(160%) blur(26px);
+
+      --ink: #e8efe9;
+      --ink-soft: #c3cfc7;
+      --muted: #8d9b93;
+      --on-accent: #0c1310;
+
+      --line: #2a3831;
+      --line-strong: #3a4c42;
+
+      --green: #5aa87a;
+      --green-dark: #3e7d5b;
+      --green-bright: #74c795;
+      --green-tint: #1e2f26;
+      --green-tint-2: #263b30;
+
+      --warm-deep: #b87a33;
+      --warm-tint: #2e2519;
+
+      --blue: #6f9ad8;
+      --amber: #d9a05a;
+      --red: #d98177;
+
+      --tone-green-fg: #8ed4aa;
+      --tone-green-bg: #22352b;
+      --tone-blue-fg: #9dc0ee;
+      --tone-blue-bg: #1e2a3a;
+      --tone-amber-fg: #e2b070;
+      --tone-amber-bg: #33281a;
+      --tone-amber-line: #4d3a22;
+      --tone-red-fg: #e8a29a;
+      --tone-red-bg: #38241f;
+      --tone-flame-fg: #e8a25e;
+      --tone-flame-bg: #33261a;
+      --tone-flame-line: #4d3a22;
+
+      --grad-accent: linear-gradient(135deg, var(--green-bright), var(--green-dark));
+      --grad-warm: linear-gradient(135deg, #d99a55, var(--warm-deep));
+      --grad-chat: linear-gradient(168deg, #16211b 0%, #1a2119 52%, #221d15 100%);
+      --grad-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+
+      --shadow: 0 16px 44px rgba(0, 0, 0, 0.40);
+      --shadow-lg: 0 32px 80px rgba(0, 0, 0, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 620px at 12% -8%, var(--green-tint), transparent 60%),
+        radial-gradient(1000px 560px at 92% 4%, var(--warm-tint), transparent 62%),
+        var(--bg);
+      background-repeat: no-repeat;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn {
+      position: relative;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: var(--glass-strong);
+      background-image: var(--grad-sheen);
+      color: var(--ink);
+      font-weight: 590;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--line-strong);
+      box-shadow: 0 6px 18px rgba(28, 38, 33, 0.10);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn.primary {
+      background-color: transparent;
+      background-image: var(--grad-accent);
+      border-color: transparent;
+      color: var(--on-accent);
+      font-weight: 620;
+      box-shadow: 0 6px 18px rgba(62, 125, 91, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 10px 26px rgba(62, 125, 91, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .btn.warm {
+      background-color: transparent;
+      background-image: var(--grad-warm);
+      border-color: transparent;
+      color: var(--on-accent);
+      font-weight: 620;
+      box-shadow: 0 6px 18px rgba(154, 92, 34, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .btn.icon-only {
+      width: 42px;
+      padding: 0;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
+    .field,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      outline: 0;
+      padding: 0 12px;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    textarea {
+      min-height: 86px;
+      padding-top: 12px;
+      resize: vertical;
+    }
+
+    .field:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(62, 125, 91, 0.16);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(30px, 4vw, 42px);
+      line-height: 1.04;
+      font-weight: 700;
+      letter-spacing: -0.028em;
+    }
+
+    h2 {
+      margin-bottom: 12px;
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin-bottom: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+    }
+
+    label {
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 590;
+      letter-spacing: -0.008em;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .subtext {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background-image: var(--grad-accent);
+      color: var(--on-accent);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      box-shadow: 0 6px 16px rgba(62, 125, 91, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .brand-copy {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 7px;
+    }
+
+    .demo-hint {
+      margin-top: 18px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .demo-hint code {
+      color: var(--green-dark);
+      font-size: 12px;
+    }
+
+    .form-status {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background-color: var(--glass);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border-right: 1px solid var(--line);
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      position: relative;
+      min-height: 42px;
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 510;
+      letter-spacing: -0.01em;
+      text-align: left;
+      transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--ink);
+      background: var(--green-tint);
+    }
+
+    .nav-btn.active {
+      color: var(--tone-green-fg);
+      background-color: var(--glass-strong);
+      background-image: var(--grad-sheen);
+      border-color: var(--glass-line);
+      font-weight: 590;
+      box-shadow: 0 2px 10px rgba(28, 38, 33, 0.06);
+    }
+
+    .nav-btn.active::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: 50%;
+      width: 3px;
+      height: 20px;
+      transform: translateY(-50%);
+      border-radius: 0 3px 3px 0;
+      background-image: var(--grad-accent);
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-card {
+      padding: 12px;
+      border: 1px solid var(--glass-line);
+      border-radius: var(--radius);
+      background-color: var(--glass-strong);
+      background-image: var(--grad-sheen);
+    }
+
+    .mini-card p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      min-height: 66px;
+      padding: 0 26px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background-color: var(--glass);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-copy {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .topbar-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .app-shell[data-role="student"] .topbar-copy,
+    .app-shell[data-role="student"] #connection-pill {
+      display: none;
+    }
+
+    .app-shell[data-role="student"] .topbar {
+      justify-content: flex-end;
+    }
+
+    .user-chip {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      white-space: nowrap;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--green-dark);
+      background: var(--green-tint-2);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .workspace {
+      padding: 24px 26px 34px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .page-head {
+      margin-bottom: 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .page-head h1 {
+      max-width: 760px;
+      font-size: clamp(26px, 3vw, 36px);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .split-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .dashboard-grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .student-chat-grid {
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+      align-items: start;
+    }
+
+    .panel,
+    .summary-card {
+      border: 1px solid var(--glass-line);
+      border-radius: var(--radius-lg);
+      background-color: var(--glass-strong);
+      background-image: var(--grad-sheen);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      min-height: 58px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 600;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .pill {
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: var(--tone-green-fg);
+      background: var(--tone-green-bg);
+      font-size: 12px;
+      font-weight: 590;
+      white-space: nowrap;
+    }
+
+    .pill.blue {
+      color: var(--tone-blue-fg);
+      background: var(--tone-blue-bg);
+    }
+
+    .pill.amber {
+      color: var(--tone-amber-fg);
+      background: var(--tone-amber-bg);
+    }
+
+    .pill.red {
+      color: var(--tone-red-fg);
+      background: var(--tone-red-bg);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+
+    .summary-card {
+      min-height: 132px;
+      padding: 16px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 510;
+    }
+
+    .summary-value {
+      margin-top: 10px;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .streak-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .streak-card .summary-value {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .flame-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--tone-flame-fg);
+      background: var(--tone-flame-bg);
+      border: 1px solid var(--tone-flame-line);
+    }
+
+    .flame-badge .icon {
+      width: 24px;
+      height: 24px;
+      flex-basis: 24px;
+      stroke-width: 2.2;
+    }
+
+    .summary-help {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-item {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .tile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--tone-green-fg);
+      background: var(--tone-green-bg);
+    }
+
+    .tile-icon.blue {
+      color: var(--tone-blue-fg);
+      background: var(--tone-blue-bg);
+    }
+
+    .tile-icon.amber {
+      color: var(--tone-amber-fg);
+      background: var(--tone-amber-bg);
+    }
+
+    .tile-icon.red {
+      color: var(--tone-red-fg);
+      background: var(--tone-red-bg);
+    }
+
+    .item-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .item-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table th {
+      color: var(--muted);
+      background: var(--surface-2);
+      font-size: 12px;
+    }
+
+    .status-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .status-row:last-child {
+      border-bottom: 0;
+    }
+
+    .quiet-box {
+      padding: 14px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .quiet-box strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .quiet-box p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .diagram-empty {
+      min-height: 360px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 28px;
+      color: var(--muted);
+    }
+
+    .diagram-empty strong {
+      display: block;
+      color: var(--ink);
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .chat-panel {
+      min-height: 620px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .chat-thread {
+      min-height: 420px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: auto;
+      background-image: var(--grad-chat);
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.48;
+      font-size: 14px;
+      letter-spacing: -0.008em;
+      animation: message-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes message-rise {
+      from { opacity: 0; transform: translateY(6px) scale(0.99); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .message { animation: none; }
+    }
+
+    .message.student {
+      align-self: flex-end;
+      color: var(--on-accent);
+      background-image: var(--grad-accent);
+      border-bottom-right-radius: 5px;
+      box-shadow: 0 8px 22px rgba(62, 125, 91, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.20);
+    }
+
+    .chat-empty {
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      color: var(--muted);
+      padding: 18px;
+      max-width: 620px;
+    }
+
+    .chat-empty strong {
+      display: block;
+      color: var(--ink);
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .message.tutor {
+      align-self: flex-start;
+      color: var(--ink);
+      background-color: var(--glass-strong);
+      background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0)), var(--warm-tint);
+      border: 1px solid var(--glass-line);
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 8px 22px rgba(28, 38, 33, 0.06);
+    }
+
+    .message-meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .message-body a {
+      color: inherit;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      word-break: break-word;
+    }
+
+    .message-body {
+      white-space: normal;
+    }
+
+    .message-body p {
+      margin: 0 0 8px;
+    }
+
+    .message-body p:last-child,
+    .message-body ul:last-child,
+    .message-body ol:last-child {
+      margin-bottom: 0;
+    }
+
+    .message-body ul,
+    .message-body ol {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .message-body li {
+      margin: 4px 0;
+    }
+
+    .message-video-results {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .message-video-card {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .message-video-card img {
+      width: 72px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--green-tint);
+    }
+
+    .message-video-card-title {
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .message-video-card-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .chat-input {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+      border-top: 1px solid var(--line);
+      background-color: var(--glass);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .chat-input textarea {
+      min-height: 46px;
+      border-radius: 12px;
+      background-color: var(--glass-strong);
+    }
+
+    .chat-session-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .chat-session-card {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .chat-session-card.active,
+    .chat-session-card:hover {
+      border-color: var(--line-strong);
+      background: var(--surface-2);
+    }
+
+    .chat-session-title {
+      color: var(--ink);
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .chat-session-meta,
+    .chat-session-preview {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 16px;
+      /* Panels clip to their radius (overflow: hidden), which zeroes their automatic
+         minimum size — without this the rows compress to equal heights when the
+         stack is height-constrained. */
+      grid-auto-rows: min-content;
+    }
+
+    /* Subjects — blocky list in the side column */
+    .subject-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .subject-card {
+      position: relative;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      align-items: center;
+      gap: 11px;
+      padding: 10px;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background-color: var(--surface-2);
+      color: var(--ink);
+      overflow: hidden;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .subject-card:hover {
+      border-color: var(--line-strong);
+      transform: translateY(-1px);
+    }
+
+    .subject-card:active {
+      transform: scale(0.985);
+    }
+
+    .subject-card.active {
+      border-color: transparent;
+      background-color: var(--glass-strong);
+      background-image: var(--grad-sheen);
+      box-shadow: 0 10px 26px rgba(62, 125, 91, 0.16), inset 0 0 0 1px var(--green-tint-2);
+    }
+
+    .subject-card.active::after {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background-image: var(--grad-accent);
+    }
+
+    .subject-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--tone-green-fg);
+      background-color: var(--tone-green-bg);
+    }
+
+    .subject-card:nth-child(3n + 2) .subject-mark {
+      color: var(--tone-amber-fg);
+      background-color: var(--tone-amber-bg);
+    }
+
+    .subject-card:nth-child(3n + 3) .subject-mark {
+      color: var(--tone-blue-fg);
+      background-color: var(--tone-blue-bg);
+    }
+
+    /* Must stay after the nth-child tints — equal specificity, so source order decides. */
+    .subject-card.active .subject-mark {
+      color: var(--on-accent);
+      background-color: transparent;
+      background-image: var(--grad-accent);
+      box-shadow: 0 4px 12px rgba(62, 125, 91, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    }
+
+    .subject-copy {
+      min-width: 0;
+      display: block;
+    }
+
+    .subject-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 590;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subject-meta {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Theme toggle */
+    .theme-icon-dark { display: none; }
+    :root[data-theme="dark"] .theme-icon-light { display: none; }
+    :root[data-theme="dark"] .theme-icon-dark { display: block; }
+
+    /* Image studio — right slide-out */
+    .studio-scrim {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: rgba(14, 21, 18, 0.28);
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+      opacity: 0;
+      transition: opacity 0.34s ease;
+    }
+
+    .studio-scrim.open {
+      opacity: 1;
+    }
+
+    .image-studio {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 21;
+      width: min(420px, 100%);
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border-left: 1px solid var(--glass-line);
+      background-color: var(--glass-strong);
+      background-image: var(--grad-sheen);
+      -webkit-backdrop-filter: var(--glass-blur);
+      backdrop-filter: var(--glass-blur);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .image-studio.open {
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .image-studio,
+      .studio-scrim {
+        transition: none;
+      }
+    }
+
+    .studio-header {
+      padding: 20px 18px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .studio-eyebrow {
+      margin-bottom: 4px;
+      color: var(--warm-deep);
+    }
+
+    .studio-title {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    .studio-body {
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    .studio-placeholder {
+      height: 100%;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 26px 22px;
+      text-align: center;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius-lg);
+      background-image: linear-gradient(168deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)), var(--warm-tint);
+    }
+
+    .studio-placeholder strong {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+    }
+
+    .studio-placeholder p {
+      margin: 0;
+      max-width: 30ch;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .studio-glyph {
+      width: 54px;
+      height: 54px;
+      margin-bottom: 6px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: var(--warm-deep);
+      background-color: var(--tone-amber-bg);
+    }
+
+    .studio-glyph svg {
+      width: 26px;
+      height: 26px;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (min-width: 1101px) {
+      #student-tutor.view.active {
+        height: calc(100vh - 124px);
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      #student-tutor .page-head {
+        flex: 0 0 auto;
+      }
+
+      #student-tutor .student-chat-grid {
+        flex: 1;
+        min-height: 0;
+        align-items: stretch;
+      }
+
+      #student-tutor .chat-panel {
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      #student-tutor .chat-thread {
+        min-height: 0;
+        overflow-y: auto;
+      }
+
+      #student-tutor .side-stack {
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        padding-right: 4px;
+        align-content: start;
+      }
+
+      #student-tutor .chat-session-list {
+        max-height: 240px;
+        overflow-y: auto;
+        padding-right: 2px;
+      }
+    }
+
+    .rating {
+      display: grid;
+      grid-template-columns: repeat(5, 36px);
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .rating button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: var(--tone-amber-fg);
+      background: var(--tone-amber-bg);
+      border: 1px solid var(--tone-amber-line);
+      font-weight: 600;
+    }
+
+    .rating button.active {
+      color: var(--on-accent);
+      background: var(--amber);
+      border-color: var(--amber);
+    }
+
+    .diagram {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .generated-image {
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .prompt-row {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .teacher-ingestion-grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      align-items: start;
+    }
+
+    .ingestion-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .file-drop {
+      min-height: 118px;
+      padding: 16px;
+      display: grid;
+      place-items: center;
+      gap: 8px;
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .file-drop strong {
+      color: var(--ink);
+    }
+
+    .file-drop input {
+      max-width: 100%;
+    }
+
+    .upload-progress {
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-3);
+    }
+
+    .upload-progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
+      transition: width 180ms ease;
+    }
+
+    .document-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .document-list .list-item {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .library-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .library-stat {
+      min-height: 70px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .library-stat strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .library-stat span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 510;
+    }
+
+    @media (max-width: 1100px) {
+      .student-chat-grid,
+      .teacher-ingestion-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+
+      .span-3,
+      .span-4,
+      .span-5,
+      .span-6,
+      .span-7,
+      .span-8,
+      .span-12 {
+        grid-column: span 6;
+      }
+    }
+
+    @media (max-width: 760px) {
+
+
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+
+      .topbar {
+        padding: 12px;
+        flex-wrap: wrap;
+      }
+
+      .workspace {
+        padding: 18px 12px 28px;
+      }
+
+      .page-head {
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .message {
+        max-width: 100%;
+      }
+
+      .message-video-card {
+        grid-template-columns: 56px 1fr;
+      }
+
+      .message-video-card img {
+        width: 56px;
+        height: 40px;
+      }
+
+      .message-video-card .btn {
+        grid-column: 1 / -1;
+        justify-content: center;
+      }
+
+      .dashboard-grid,
+      .split-grid,
+      .chat-input,
+      .form-grid,
+      .library-summary,
+      .prompt-row {
+        grid-template-columns: 1fr;
+      }
+
+      .span-3,
+      .span-4,
+      .span-5,
+      .span-6,
+      .span-7,
+      .span-8,
+      .span-12 {
+        grid-column: auto;
+      }
+
+      .list-item {
+        grid-template-columns: auto 1fr;
+      }
+
+      .document-list .list-item {
+        grid-template-columns: auto 1fr;
+      }
+
+      .document-list .list-item .actions {
+        grid-column: 2;
+        justify-content: flex-start;
+      }
+
+      .list-item .btn,
+      .list-item .pill {
+        grid-column: 2;
+        justify-self: start;
+      }
+
+      .message {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth removed: no sign-in screen. The app boots straight into the workspace. -->
+
+  <section class="app-shell" id="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div>
+          <div class="brand-name">Roognis</div>
+          <div class="brand-copy" id="workspace-label">Student workspace</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav"></nav>
+
+      <div class="sidebar-bottom">
+        <div class="mini-card">
+          <strong id="context-title">Learning</strong>
+          <p id="context-copy">AI tutor flows are active first.</p>
+        </div>
+        <!-- Auth removed: signing in used to decide the role. This switcher
+             replaces it so the teacher and parent portals stay reachable. -->
+        <div class="field-group">
+          <label for="role-switch">Demo role</label>
+          <select class="field" id="role-switch">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="parent">Parent</option>
+          </select>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-copy">
+          <div class="topbar-title" id="topbar-title">Home</div>
+          <div class="topbar-subtitle" id="topbar-subtitle">Auth, tutor chat, diagrams, videos, and feedback</div>
+        </div>
+        <span class="pill amber" id="connection-pill"><span class="dot"></span>Connecting</span>
+        <button class="btn icon-only" id="theme-toggle" type="button" aria-label="Switch theme" aria-pressed="false">
+          <svg class="icon theme-icon-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2 12h2.4M19.6 12H22M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+          <svg class="icon theme-icon-dark" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8"/></svg>
+        </button>
+        <button class="btn icon-only" aria-label="Notifications">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        </button>
+        <div class="user-chip">
+          <div class="avatar" id="avatar">AS</div>
+          <span id="user-name">Arjun Sharma</span>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <section class="view active" id="student-mvp">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Learning</p>
+              <h1>Continue learning.</h1>
+              <p class="subtext">Ask doubts, create diagrams, and save useful videos from your current lesson.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" data-route="student-videos">Open videos</button>
+              <button class="btn primary" data-route="student-tutor">Ask tutor</button>
+            </div>
+          </div>
+
+          <div class="grid dashboard-grid">
+            <div class="summary-card span-3 streak-card">
+              <div class="summary-label">Learning streak</div>
+              <div class="summary-value">
+                <span id="student-streak-value">0</span>
+                <span class="flame-badge" aria-label="Learning streak">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M8.5 14.5A4.5 4.5 0 0 0 13 19a4.5 4.5 0 0 0 4.5-4.5c0-2.7-1.7-4.5-3.4-6.3-.9-.9-1.7-1.9-2.1-3.2-2 1.2-3.2 3.1-3 5.3-1-.5-1.8-1.2-2.4-2.1-.8 1.2-1.3 2.6-1.3 4.1A7.2 7.2 0 0 0 13 19"/></svg>
+                </span>
+              </div>
+              <div class="summary-help" id="student-streak-help">Consecutive active learning days.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Tracked study time</div>
+              <div class="summary-value" id="student-time-value">0m</div>
+              <div class="summary-help">Only counts events with real duration.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Lessons done</div>
+              <div class="summary-value" id="student-lessons-value">0</div>
+              <div class="summary-help">Completed lessons and submitted practice this week.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Practice progress</div>
+              <div class="summary-value" id="student-progress-value">0%</div>
+              <div class="summary-help">From quiz and practice events when available.</div>
+            </div>
+
+            <section class="panel span-7">
+              <div class="panel-header">
+                <div class="panel-title">Student flow</div>
+              </div>
+              <div class="panel-body list">
+                <div class="list-item">
+                  <div class="tile-icon">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                  </div>
+                  <div>
+                    <div class="item-title">Ask a lesson question</div>
+                    <div class="item-subtitle">Creates a student chat session and streams the tutor answer.</div>
+                  </div>
+                  <button class="btn" data-route="student-tutor">Open</button>
+                </div>
+                <div class="list-item">
+                  <div class="tile-icon amber">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M4 19h16M5 17l4-8 4 5 3-4 3 7"/></svg>
+                  </div>
+                  <div>
+                    <div class="item-title">Generate a school diagram</div>
+                    <div class="item-subtitle">Uses the AI image endpoint with child-safety checks.</div>
+                  </div>
+                  <button class="btn" data-route="student-diagrams">Create</button>
+                </div>
+                <div class="list-item">
+                  <div class="tile-icon blue">
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+                  </div>
+                  <div>
+                    <div class="item-title">Watch curated support videos</div>
+                    <div class="item-subtitle">Loads approved videos for the selected topic.</div>
+                  </div>
+                  <button class="btn" data-route="student-videos">View</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel span-5">
+              <div class="panel-header">
+                <div class="panel-title">Learning analytics</div>
+                <span class="pill" id="student-analytics-pill">Loading</span>
+              </div>
+              <div class="panel-body">
+                <div class="list" id="student-course-progress">
+                  <div class="quiet-box">
+                    <strong>No learning events yet.</strong>
+                    <p>Ask the tutor, generate a diagram, or request a video to start building progress.</p>
+                  </div>
+                </div>
+                <div class="status-list" style="margin-top: 14px;">
+                  <div class="status-row"><span>Tutor practice</span><strong>Tracked</strong></div>
+                  <div class="status-row"><span>Diagram work</span><strong>Tracked</strong></div>
+                  <div class="status-row"><span>Video requests</span><strong>Tracked</strong></div>
+                  <div class="status-row"><span>Practice quiz</span><strong>Waiting</strong></div>
+                  <div class="status-row"><span>Parent summary</span><strong>Shared</strong></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="student-tutor">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Tutor Chat</p>
+              <h1>Ask a school question.</h1>
+              <p class="subtext">Student-only chat uses the AI service, child safety layer, and saved session history.</p>
+            </div>
+            <div class="actions">
+              <button class="btn warm" id="open-image-studio-btn" type="button" aria-controls="image-studio" aria-expanded="false">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5z"/><path d="m4 16 4.5-4.5 4 4L16 12l4 4"/><circle cx="9" cy="8" r="1.4"/></svg>
+                Image studio
+              </button>
+            </div>
+          </div>
+
+          <div class="grid student-chat-grid">
+            <section class="panel chat-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+                  Tutor session
+                </div>
+                <div class="actions">
+                  <button class="btn" id="new-chat-btn" type="button">New chat</button>
+                  <span class="pill" id="session-pill"><span class="dot"></span>Ready</span>
+                </div>
+              </div>
+              <div class="chat-thread" id="chat-thread">
+                <div class="chat-empty" id="chat-empty">
+                  <strong>Start from your selected lesson.</strong>
+                  <span>Ask a doubt, request an example, or ask for a video for the current chapter.</span>
+                </div>
+              </div>
+              <form class="chat-input" id="chat-form">
+                <textarea id="chat-input" maxlength="500" placeholder="Ask from your class topic"></textarea>
+                <button class="btn primary" type="submit">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+                  Send
+                </button>
+              </form>
+            </section>
+
+            <div class="side-stack">
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Subjects
+                  </div>
+                  <span class="pill" id="subject-count-pill">0</span>
+                </div>
+                <div class="panel-body">
+                  <div class="subject-list" id="subject-list" role="group" aria-label="Lesson context">
+                    <div class="quiet-box">
+                      <strong>Loading lessons.</strong>
+                      <p>Uploaded chapters will appear here as selectable subjects.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title">Recent chats</div>
+                  <button class="btn icon-only" id="refresh-chat-sessions-btn" type="button" aria-label="Refresh chats">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9 9.8 9.8 0 0 1-6.7-2.7"/><path d="M3 12a9 9 0 0 1 9-9 9.8 9.8 0 0 1 6.7 2.7"/><path d="M21 3v6h-6"/><path d="M3 21v-6h6"/></svg>
+                  </button>
+                </div>
+                <div class="panel-body">
+                  <div class="chat-session-list" id="chat-session-list">
+                    <div class="quiet-box">
+                      <strong>No saved chats yet.</strong>
+                      <p>Ask the tutor once and the conversation will appear here.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title">Feedback</div>
+                  <span class="pill blue">AI endpoint</span>
+                </div>
+                <div class="panel-body">
+                  <div class="small">Rate the latest tutor response after it is saved.</div>
+                  <div class="rating" id="rating-buttons">
+                    <button type="button" data-rating="1">1</button>
+                    <button type="button" data-rating="2">2</button>
+                    <button type="button" data-rating="3">3</button>
+                    <button type="button" data-rating="4">4</button>
+                    <button class="active" type="button" data-rating="5">5</button>
+                  </div>
+                  <input class="field" id="feedback-comment" placeholder="Optional note">
+                  <button class="btn" id="feedback-btn" style="margin-top: 10px;">Submit feedback</button>
+                  <div class="small" id="feedback-status" style="margin-top: 10px;"></div>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title">Lesson source</div>
+                  <span class="pill" id="lesson-source-pill">Loading</span>
+                </div>
+                <div class="panel-body" id="lesson-source-summary">
+                  <div class="quiet-box">
+                    <strong>Loading uploaded lessons.</strong>
+                    <p>The tutor will use teacher-uploaded chapters when a matching lesson is available.</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="student-diagrams">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Diagrams</p>
+              <h1>Create safe educational diagrams.</h1>
+              <p class="subtext">Type the diagram you need and generate a fresh school-safe image.</p>
+            </div>
+          </div>
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">New diagram</div>
+              <span class="pill" id="image-status">Ready</span>
+            </div>
+            <div class="panel-body">
+              <div class="diagram-empty" id="diagram-placeholder">
+                <div>
+                  <strong>No diagram generated yet.</strong>
+                  <span>Enter a topic below and generate a fresh diagram.</span>
+                </div>
+              </div>
+              <img class="generated-image hidden" id="generated-image" alt="Generated educational diagram">
+              <div class="prompt-row">
+                <input class="field" id="image-prompt" value="photosynthesis process diagram for grade 6">
+                <button class="btn primary" id="generate-btn">Generate</button>
+              </div>
+              <div class="small" id="image-note" style="margin-top: 10px;"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="student-videos">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Videos</p>
+              <h1>Real-time lesson videos.</h1>
+              <p class="subtext">Ask the tutor for a video and safe real-time results will appear here.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="reload-videos-btn">Refresh</button>
+            </div>
+          </div>
+          <div class="grid dashboard-grid">
+            <section class="panel span-12 hidden" id="chat-video-panel">
+              <div class="panel-header">
+                <div class="panel-title">Recommended from tutor chat</div>
+                <span class="pill blue">Saved locally</span>
+              </div>
+              <div class="panel-body list" id="chat-video-recommendations"></div>
+            </section>
+            <section class="panel span-5">
+              <div class="panel-header">
+                <div class="panel-title">Real-time search</div>
+                <span class="pill" id="video-topic-pill">Ready</span>
+              </div>
+              <div class="panel-body list" id="video-topics"></div>
+            </section>
+            <section class="panel span-7">
+              <div class="panel-header">
+                <div class="panel-title">Selected result</div>
+              </div>
+              <div class="panel-body list" id="video-detail"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="teacher-mvp">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Teacher MVP</p>
+              <h1>Class learning overview.</h1>
+              <p class="subtext">Review class learning activity, quiz signals, and the textbook chapters available to the tutor.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="reload-teacher-analytics-btn">Refresh</button>
+              <button class="btn primary" data-route="teacher-ingestion">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg>
+                Upload PDF
+              </button>
+            </div>
+          </div>
+          <div class="grid dashboard-grid">
+            <div class="summary-card span-3">
+              <div class="summary-label">Class students</div>
+              <div class="summary-value" id="teacher-student-count">0</div>
+              <div class="summary-help">Students assigned to your classes.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Active this week</div>
+              <div class="summary-value" id="teacher-active-count">0</div>
+              <div class="summary-help">Students with learning events in 7 days.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Latest quiz</div>
+              <div class="summary-value" id="teacher-quiz-status">None</div>
+              <div class="summary-help" id="teacher-quiz-help">No quiz activity yet.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Avg quiz score</div>
+              <div class="summary-value" id="teacher-avg-score">-</div>
+              <div class="summary-help">From quiz graded events.</div>
+            </div>
+
+            <section class="panel span-7">
+              <div class="panel-header">
+                <div class="panel-title">Learning engagement</div>
+                <span class="pill" id="teacher-analytics-pill">Loading</span>
+              </div>
+              <div class="panel-body status-list" id="teacher-engagement-list">
+                <div class="status-row"><span>Tutor chat</span><strong>0</strong></div>
+                <div class="status-row"><span>Diagrams</span><strong>0</strong></div>
+                <div class="status-row"><span>Videos</span><strong>0</strong></div>
+                <div class="status-row"><span>Practice quiz</span><strong>0</strong></div>
+              </div>
+            </section>
+            <section class="panel span-5">
+              <div class="panel-header">
+                <div class="panel-title">Teacher follow-ups</div>
+              </div>
+              <div class="panel-body list" id="teacher-actions-list">
+                <div class="quiet-box">
+                  <strong>No follow-ups yet.</strong>
+                  <p>Follow-ups appear after students use tutor, videos, diagrams, or quizzes.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel span-6">
+              <div class="panel-header">
+                <div class="panel-title">Weak areas</div>
+              </div>
+              <div class="panel-body list" id="teacher-weak-areas">
+                <div class="quiet-box">
+                  <strong>No weak areas yet.</strong>
+                  <p>Quiz graded events can add topic-level weak areas here.</p>
+                </div>
+              </div>
+            </section>
+            <section class="panel span-6">
+              <div class="panel-header">
+                <div class="panel-title">Knowledge coverage</div>
+              </div>
+              <div class="panel-body status-list" id="teacher-knowledge-list">
+                <div class="quiet-box">
+                  <strong>No indexed chapters yet.</strong>
+                  <p>Upload chapter PDFs so tutor answers can use lesson-backed context.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="teacher-ingestion">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Knowledge Ingestion</p>
+              <h1>Upload a textbook chapter PDF.</h1>
+              <p class="subtext">Upload teacher-approved chapter PDFs with the exact lesson metadata students will select in tutor chat.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="refresh-documents-btn" type="button">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="grid teacher-ingestion-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg>
+                  PDF upload
+                </div>
+                <span class="pill" id="ingestion-status-pill"><span class="dot"></span>Ready</span>
+              </div>
+              <div class="panel-body">
+                <form class="ingestion-form" id="ingestion-form">
+                  <label class="file-drop" for="ingestion-file">
+                    <strong id="ingestion-file-label">Select PDF</strong>
+                    <span class="small">PDF only, up to the RAG service limit.</span>
+                    <input id="ingestion-file" name="file" type="file" accept="application/pdf,.pdf" required>
+                  </label>
+
+                  <div class="form-grid">
+                    <div class="field-group">
+                      <label for="ingestion-board">Board</label>
+                      <select id="ingestion-board" name="board" required>
+                        <option value="CBSE">CBSE</option>
+                        <option value="ICSE">ICSE</option>
+                        <option value="State">State</option>
+                        <option value="IB">IB</option>
+                      </select>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-curriculum">Curriculum</label>
+                      <select id="ingestion-curriculum" name="curriculum" required>
+                        <option value="NCERT">NCERT</option>
+                        <option value="SCERT">SCERT</option>
+                        <option value="School">School</option>
+                      </select>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-grade">Grade</label>
+                      <select id="ingestion-grade" name="grade" required>
+                        <option value="6" selected>6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                      </select>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-subject">Subject</label>
+                      <input class="field" id="ingestion-subject" name="subject" value="Science" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-book">Book</label>
+                      <input class="field" id="ingestion-book" name="book" value="Curiosity" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-chapter-number">Chapter</label>
+                      <input class="field" id="ingestion-chapter-number" name="chapterNumber" type="number" min="1" value="1" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-chapter-name">Chapter name</label>
+                      <input class="field" id="ingestion-chapter-name" name="chapterName" value="Plants and nutrition" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-language">Language</label>
+                      <input class="field" id="ingestion-language" name="language" value="English" required>
+                    </div>
+                    <div class="field-group">
+                      <label for="ingestion-edition">Edition</label>
+                      <input class="field" id="ingestion-edition" name="edition" value="2026-27" required>
+                    </div>
+                  </div>
+
+                  <div class="upload-progress" aria-hidden="true">
+                    <div class="upload-progress-bar" id="ingestion-progress-bar"></div>
+                  </div>
+
+                  <div class="actions">
+                    <button class="btn" id="reset-ingestion-btn" type="reset">Reset</button>
+                    <button class="btn primary" id="ingestion-submit-btn" type="submit">
+                      <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg>
+                      Upload
+                    </button>
+                  </div>
+                  <div class="form-status" id="ingestion-status">Ready for a teacher PDF.</div>
+                </form>
+              </div>
+            </section>
+
+            <div class="side-stack">
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title">Latest upload</div>
+                  <span class="pill blue" id="ingestion-result-pill">No document</span>
+                </div>
+                <div class="panel-body status-list" id="ingestion-result">
+                  <div class="status-row"><span>Document</span><strong>-</strong></div>
+                  <div class="status-row"><span>Status</span><strong>Waiting</strong></div>
+                  <div class="status-row"><span>Progress</span><strong>0%</strong></div>
+                  <div class="status-row"><span>Entities</span><strong>-</strong></div>
+                  <div class="status-row"><span>Chunks</span><strong>-</strong></div>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-header">
+                  <div class="panel-title">Uploaded documents</div>
+                  <span class="pill" id="documents-count-pill">0 documents</span>
+                </div>
+                <div class="panel-body">
+                  <div class="library-summary" id="document-library-summary">
+                    <div class="library-stat"><span>Ready</span><strong>0</strong></div>
+                    <div class="library-stat"><span>Failed</span><strong>0</strong></div>
+                    <div class="library-stat"><span>Chunks</span><strong>0</strong></div>
+                  </div>
+                  <div class="document-list" id="teacher-documents">
+                    <div class="quiet-box">
+                      <strong>No documents loaded.</strong>
+                      <p>Sign in as a teacher and refresh after uploading a PDF.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="parent-mvp">
+          <div class="page-head">
+            <div>
+              <p class="eyebrow">Parent MVP</p>
+              <h1 id="parent-dashboard-title">Linked child progress.</h1>
+              <p class="subtext">See learning activity from tutor chat, diagrams, videos, and quiz attempts for the selected child.</p>
+            </div>
+            <div class="actions">
+              <button class="btn" id="reload-parent-analytics-btn">Refresh</button>
+            </div>
+          </div>
+          <div class="grid dashboard-grid">
+            <div class="summary-card span-3">
+              <div class="summary-label">Learning streak</div>
+              <div class="summary-value" id="parent-streak-value">0</div>
+              <div class="summary-help">Days active from learning events.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Time spent</div>
+              <div class="summary-value" id="parent-time-value">0m</div>
+              <div class="summary-help">This week.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Quiz status</div>
+              <div class="summary-value" id="parent-quiz-status">None</div>
+              <div class="summary-help" id="parent-quiz-help">From quiz events when available.</div>
+            </div>
+            <div class="summary-card span-3">
+              <div class="summary-label">Lessons done</div>
+              <div class="summary-value" id="parent-lessons-value">0</div>
+              <div class="summary-help">Completed items this week.</div>
+            </div>
+
+            <section class="panel span-5">
+              <div class="panel-header">
+                <div class="panel-title">Linked children</div>
+                <span class="pill blue">Auth Service</span>
+              </div>
+              <div class="panel-body list" id="linked-children">
+                <div class="list-item">
+                  <div class="tile-icon">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21a6 6 0 0 1 12 0"/></svg>
+                  </div>
+                  <div>
+                    <div class="item-title">Arjun Sharma</div>
+                    <div class="item-subtitle">Linked by school</div>
+                  </div>
+                  <span class="pill">Ready</span>
+                </div>
+              </div>
+            </section>
+            <section class="panel span-7">
+              <div class="panel-header">
+                <div class="panel-title">Recent learning activity</div>
+                <span class="pill" id="parent-analytics-pill">Loading</span>
+              </div>
+              <div class="panel-body list" id="parent-recent-activity">
+                <div class="quiet-box">
+                  <strong>No learning activity yet.</strong>
+                  <p>Activity appears after the linked child uses tutor, diagrams, videos, or quizzes.</p>
+                </div>
+              </div>
+            </section>
+            <section class="panel span-12">
+              <div class="panel-header">
+                <div class="panel-title">Course progress and weak areas</div>
+              </div>
+              <div class="panel-body split-grid">
+                <div class="list" id="parent-course-progress">
+                  <div class="quiet-box">
+                    <strong>No course progress yet.</strong>
+                    <p>Progress is derived from the child’s learning events.</p>
+                  </div>
+                </div>
+                <div class="list" id="parent-weak-areas">
+                  <div class="quiet-box">
+                    <strong>No weak areas yet.</strong>
+                    <p>Quiz graded events can add weak areas later.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="studio-scrim" id="image-studio-scrim" hidden></div>
+
+    <aside class="image-studio" id="image-studio" aria-labelledby="image-studio-title" aria-hidden="true" hidden>
+      <header class="studio-header">
+        <div class="studio-heading">
+          <p class="eyebrow studio-eyebrow">Coming soon</p>
+          <h2 class="studio-title" id="image-studio-title">Image studio</h2>
+        </div>
+        <button class="btn icon-only" id="close-image-studio-btn" type="button" aria-label="Close image studio">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </header>
+
+      <div class="studio-body">
+        <div class="studio-placeholder">
+          <div class="studio-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5z"/><path d="m4 16 4.5-4.5 4 4L16 12l4 4"/><circle cx="9" cy="8" r="1.4"/></svg>
+          </div>
+          <strong>Not wired up yet.</strong>
+          <p>Diagram and image generation will land here. The panel is scaffolded so the layout and motion can be reviewed ahead of the service work.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <script>
+    const iconPaths = {
+      dashboard: 'M4 5h16v12H4z M8 21h8M12 17v4',
+      chat: 'M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z',
+      image: 'M4 19h16M5 17l4-8 4 5 3-4 3 7',
+      video: 'M3 5h18v14H3z M10 9l5 3-5 3',
+      upload: 'M12 16V4 M7 9l5-5 5 5 M4 20h16',
+      user: 'M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M2 21a6 6 0 0 1 12 0 M17 7v6M14 10h6',
+    };
+
+    const roleConfig = {
+      student: {
+        label: 'Student workspace',
+        contextTitle: 'Learning',
+        contextCopy: 'Tutor chat, diagrams, videos, and parent progress.',
+        defaultRoute: 'student-mvp',
+        nav: [
+          ['student-mvp', 'Home', iconPaths.dashboard],
+          ['student-tutor', 'Tutor', iconPaths.chat],
+          ['student-diagrams', 'Diagrams', iconPaths.image],
+          ['student-videos', 'Videos', iconPaths.video],
+        ],
+      },
+      teacher: {
+        label: 'Teacher workspace',
+        contextTitle: 'Class and knowledge',
+        contextCopy: 'Track class activity and upload teacher-approved lesson PDFs.',
+        defaultRoute: 'teacher-mvp',
+        nav: [
+          ['teacher-mvp', 'Class Overview', iconPaths.dashboard],
+          ['teacher-ingestion', 'Ingestion', iconPaths.upload],
+        ],
+      },
+      parent: {
+        label: 'Parent workspace',
+        contextTitle: 'Linked child',
+        contextCopy: 'Linked child progress comes from learning activity.',
+        defaultRoute: 'parent-mvp',
+        nav: [
+          ['parent-mvp', 'Progress', iconPaths.user],
+        ],
+      },
+    };
+
+    const routeMeta = {
+      'student-mvp': ['Home', 'Learning dashboard'],
+      'student-tutor': ['Tutor', 'Ask questions from your selected lesson'],
+      'student-diagrams': ['Diagrams', 'Create school diagrams'],
+      'student-videos': ['Videos', 'Video recommendations from tutor chat'],
+      'teacher-mvp': ['Teacher Dashboard', 'Class activity and knowledge coverage'],
+      'teacher-ingestion': ['Knowledge Ingestion', 'Upload PDFs into the Educational Knowledge Engine'],
+      'parent-mvp': ['Parent Progress', 'Linked child summary from analytics'],
+    };
+
+    // Auth removed: these are display-only personas for the role switcher, not
+    // accounts. userId matches the demo roster in services/analytics.
+    const demoUsers = {
+      student: { role: 'student', name: 'Arjun Sharma', initials: 'AS', userId: '00000000-0000-0000-0000-000000000002' },
+      teacher: { role: 'teacher', name: 'Demo Teacher', initials: 'DT', userId: '00000000-0000-0000-0000-000000000003' },
+      parent: { role: 'parent', name: 'Demo Parent', initials: 'DP', userId: null },
+    };
+
+    const state = {
+      role: 'student',
+      user: demoUsers.student,
+      apiOnline: false,
+      demoMode: false,
+      sessionId: null,
+      lastAssistantMessageId: null,
+      feedbackRating: 5,
+      chatVideoRecommendations: [],
+      chatSessions: [],
+      availableLessons: [],
+      selectedLessonKey: null,
+      pendingActiveSeconds: 0,
+      lastActivityTickAt: Date.now(),
+      activityFlushInFlight: false,
+      ingestionPollTimer: null,
+      activeIngestionDocumentId: null,
+      selectedParentStudentId: null,
+    };
+
+    const appShell = document.querySelector('#app-shell');
+    const nav = document.querySelector('#nav');
+    const allViews = document.querySelectorAll('.view');
+
+    function initials(name) {
+      return name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0].toUpperCase())
+        .join('') || 'R';
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[char]));
+    }
+
+    function safeUrl(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return '#';
+      try {
+        const url = new URL(raw, window.location.href);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '#';
+      } catch (error) {
+        return '#';
+      }
+    }
+
+    function setConnection(online, copy) {
+      state.apiOnline = online;
+      const pill = document.querySelector('#connection-pill');
+      pill.className = online ? 'pill' : 'pill amber';
+      pill.innerHTML = `<span class="dot"></span>${copy}`;
+    }
+
+    class ApiError extends Error {
+      constructor(message, status, payload) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+        this.payload = payload;
+      }
+    }
+
+    async function apiJson(path, options = {}) {
+      const response = await fetch(path, {
+        method: options.method || 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+      const contentType = response.headers.get('content-type') || '';
+      const rawBody = await response.text();
+      let payload = null;
+      if (contentType.includes('application/json') && rawBody) {
+        payload = JSON.parse(rawBody);
+      }
+      if (!response.ok) {
+        throw new ApiError(apiErrorMessage(payload, response.status), response.status, payload);
+      }
+      if (!contentType.includes('application/json')) {
+        throw new ApiError('Backend API returned a non-JSON response.', response.status, null);
+      }
+      return payload;
+    }
+
+    async function apiForm(path, formData) {
+      const response = await fetch(path, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const contentType = response.headers.get('content-type') || '';
+      const rawBody = await response.text();
+      let payload = null;
+      if (contentType.includes('application/json') && rawBody) {
+        payload = JSON.parse(rawBody);
+      }
+      if (!response.ok) {
+        throw new ApiError(apiErrorMessage(payload, response.status), response.status, payload);
+      }
+      if (!contentType.includes('application/json')) {
+        throw new ApiError('Backend API returned a non-JSON response.', response.status, null);
+      }
+      return payload;
+    }
+
+    function apiErrorMessage(payload, status) {
+      if (payload?.error) return payload.error;
+      if (typeof payload?.detail === 'string') return payload.detail;
+      if (Array.isArray(payload?.detail)) {
+        return payload.detail
+          .map(item => item?.msg || item?.message || String(item))
+          .join('; ');
+      }
+      return `Request failed with status ${status}`;
+    }
+
+    function renderNav(role) {
+      const config = roleConfig[role];
+      nav.innerHTML = config.nav.map(([route, label, path]) => `
+        <button class="nav-btn" data-route="${route}">
+          <svg class="icon" viewBox="0 0 24 24"><path d="${path}"/></svg>
+          ${label}
+        </button>
+      `).join('');
+
+      nav.querySelectorAll('[data-route]').forEach(button => {
+        button.addEventListener('click', () => showRoute(button.dataset.route));
+      });
+    }
+
+    function setRole(role, user, options = {}) {
+      const loadData = options.loadData !== false;
+      state.role = role;
+      state.user = user;
+      appShell.dataset.role = role;
+      state.sessionId = null;
+      state.lastAssistantMessageId = null;
+      state.activeIngestionDocumentId = null;
+      state.selectedParentStudentId = null;
+      clearTimeout(state.ingestionPollTimer);
+
+      const config = roleConfig[role];
+      document.querySelector('#user-name').textContent = user.name;
+      document.querySelector('#avatar').textContent = user.initials || initials(user.name);
+      document.querySelector('#workspace-label').textContent = config.label;
+      document.querySelector('#context-title').textContent = config.contextTitle;
+      document.querySelector('#context-copy').textContent = config.contextCopy;
+
+      renderNav(role);
+      showRoute(config.defaultRoute);
+      if (!loadData) return;
+      if (role === 'student') {
+        loadStudentLessons();
+        loadChatSessions();
+        loadVideoTopics();
+        loadStudentDashboard();
+      }
+      if (role === 'teacher') {
+        loadTeacherDashboard();
+        loadTeacherDocuments();
+      }
+      if (role === 'parent') loadLinkedChildren();
+    }
+
+    function showRoute(route) {
+      allViews.forEach(view => view.classList.toggle('active', view.id === route));
+      nav.querySelectorAll('[data-route]').forEach(button => {
+        button.classList.toggle('active', button.dataset.route === route);
+      });
+      const meta = routeMeta[route] || routeMeta[roleConfig[state.role].defaultRoute];
+      document.querySelector('#topbar-title').textContent = meta[0];
+      document.querySelector('#topbar-subtitle').textContent = meta[1];
+      if (route === 'student-tutor') {
+        loadStudentLessons();
+        loadChatSessions();
+      }
+      if (route === 'teacher-ingestion') loadTeacherDocuments();
+    }
+
+    // Auth removed: no login or logout. Switching role is a pure client-side
+    // view change — the backend neither knows nor cares who is calling.
+    document.querySelector('#role-switch').addEventListener('change', event => {
+      const role = event.target.value;
+      state.sessionId = null;
+      state.lastAssistantMessageId = null;
+      state.activeIngestionDocumentId = null;
+      clearTimeout(state.ingestionPollTimer);
+      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Ready';
+      setRole(role, demoUsers[role]);
+    });
+
+    document.addEventListener('click', event => {
+      const routeButton = event.target.closest('[data-route]');
+      if (!routeButton) return;
+      showRoute(routeButton.dataset.route);
+    });
+
+    function setIngestionState(kind, copy, progress) {
+      const pill = document.querySelector('#ingestion-status-pill');
+      const status = document.querySelector('#ingestion-status');
+      const bar = document.querySelector('#ingestion-progress-bar');
+      const clampedProgress = Math.max(0, Math.min(Number(progress || 0), 100));
+      const classes = {
+        ready: 'pill',
+        uploading: 'pill blue',
+        processing: 'pill amber',
+        complete: 'pill',
+        failed: 'pill red',
+      };
+      pill.className = classes[kind] || 'pill';
+      pill.innerHTML = `<span class="dot"></span>${copy}`;
+      status.textContent = copy;
+      bar.style.width = `${clampedProgress}%`;
+    }
+
+    function formatStatus(value) {
+      return String(value || 'waiting')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    async function loadStudentLessons() {
+      const list = document.querySelector('#subject-list');
+      if (!list || state.role !== 'student') return;
+
+      if (state.demoMode) {
+        renderStudentLessonOptions([
+          {
+            key: 'demo-science-6-1',
+            title: 'Science - Grade 6 - Chapter 1',
+            subtitle: 'Plants and nutrition',
+            context: {
+              board: 'CBSE',
+              curriculum: 'NCERT',
+              grade: 6,
+              subject: 'Science',
+              chapterNumber: 1,
+              chapterName: 'Plants and nutrition',
+            },
+          },
+        ]);
+        return;
+      }
+
+      try {
+        const payload = await apiJson('/api/rag/documents?status=ready');
+        const lessons = (payload.documents || [])
+          .map(documentToStudentLesson)
+          .filter(Boolean);
+        renderStudentLessonOptions(lessons);
+        setConnection(true, 'Online');
+      } catch (error) {
+        state.availableLessons = [];
+        state.selectedLessonKey = null;
+        renderStudentLessonOptions([], error.message);
+        if (!error.status) setConnection(false, 'Offline');
+      }
+    }
+
+    function documentToStudentLesson(item) {
+      if (item.status && item.status !== 'ready') return null;
+      const metadata = item.metadata || {};
+      const subject = cleanText(metadata.subject);
+      const grade = Number(metadata.grade || 0) || null;
+      const chapterNumber = Number(metadata.chapterNumber || 0) || null;
+      const chapterName = cleanText(metadata.chapterName);
+      if (!subject) return null;
+
+      const title = [
+        subject,
+        grade ? `Grade ${grade}` : '',
+        chapterNumber ? `Chapter ${chapterNumber}` : '',
+      ].filter(Boolean).join(' - ');
+
+      return {
+        key: item.documentId || `${subject}-${grade || 'any'}-${chapterNumber || 'chapter'}-${chapterName}`,
+        title,
+        subtitle: chapterName || item.filename || 'Uploaded lesson',
+        chunkCount: Number(item.chunkCount || 0),
+        context: {
+          board: cleanText(metadata.board),
+          curriculum: cleanText(metadata.curriculum),
+          grade,
+          subject,
+          chapterNumber,
+          chapterName,
+        },
+      };
+    }
+
+    function cleanText(value) {
+      return typeof value === 'string' ? value.trim() : '';
+    }
+
+    function subjectInitials(lesson) {
+      const subject = cleanText(lesson.context?.subject) || cleanText(lesson.title) || '?';
+      return subject.slice(0, 2).toUpperCase();
+    }
+
+    function renderStudentLessonOptions(lessons, errorMessage = '') {
+      const list = document.querySelector('#subject-list');
+      if (!list) return;
+
+      state.availableLessons = lessons;
+      const previousSelection = state.selectedLessonKey;
+      const nextSelection = lessons.some(lesson => lesson.key === previousSelection)
+        ? previousSelection
+        : lessons[0]?.key || null;
+      state.selectedLessonKey = nextSelection;
+      renderSubjectCount(lessons.length, errorMessage);
+
+      if (errorMessage) {
+        list.innerHTML = `
+          <div class="quiet-box">
+            <strong>Subjects unavailable.</strong>
+            <p>${escapeHtml(errorMessage)}</p>
+          </div>
+        `;
+        renderSelectedLessonSummary(errorMessage);
+        return;
+      }
+
+      if (!lessons.length) {
+        list.innerHTML = `
+          <div class="quiet-box">
+            <strong>No uploaded lessons yet.</strong>
+            <p>A teacher upload will add selectable subjects here.</p>
+          </div>
+        `;
+        renderSelectedLessonSummary();
+        return;
+      }
+
+      list.innerHTML = lessons.map(lesson => {
+        const active = lesson.key === state.selectedLessonKey;
+        const label = `${lesson.title} — ${lesson.subtitle}`;
+        return `
+          <button class="subject-card${active ? ' active' : ''}" type="button"
+                  aria-pressed="${active}" aria-label="${escapeHtml(label)}"
+                  data-lesson-key="${escapeHtml(lesson.key)}">
+            <span class="subject-mark" aria-hidden="true">${escapeHtml(subjectInitials(lesson))}</span>
+            <span class="subject-copy">
+              <span class="subject-name">${escapeHtml(lesson.title)}</span>
+              <span class="subject-meta">${escapeHtml(lesson.subtitle)}</span>
+            </span>
+          </button>
+        `;
+      }).join('');
+      renderSelectedLessonSummary();
+    }
+
+    function renderSubjectCount(count, errorMessage = '') {
+      const pill = document.querySelector('#subject-count-pill');
+      if (!pill) return;
+      if (errorMessage) {
+        pill.className = 'pill red';
+        pill.textContent = 'Unavailable';
+        return;
+      }
+      pill.className = 'pill';
+      pill.textContent = String(count);
+    }
+
+    function syncSubjectSelection() {
+      document.querySelectorAll('#subject-list .subject-card').forEach(card => {
+        const active = card.dataset.lessonKey === state.selectedLessonKey;
+        card.classList.toggle('active', active);
+        card.setAttribute('aria-pressed', String(active));
+      });
+    }
+
+    function selectedLesson() {
+      return state.availableLessons.find(lesson => lesson.key === state.selectedLessonKey) || null;
+    }
+
+    function renderSelectedLessonSummary(errorMessage = '') {
+      const pill = document.querySelector('#lesson-source-pill');
+      const summary = document.querySelector('#lesson-source-summary');
+      if (!pill || !summary) return;
+
+      if (errorMessage) {
+        pill.className = 'pill red';
+        pill.textContent = 'Unavailable';
+        summary.innerHTML = `
+          <div class="quiet-box">
+            <strong>Lesson list unavailable.</strong>
+            <p>${escapeHtml(errorMessage)}</p>
+          </div>
+        `;
+        return;
+      }
+
+      const lesson = selectedLesson();
+      if (!lesson) {
+        pill.className = 'pill amber';
+        pill.textContent = 'No lesson';
+        summary.innerHTML = `
+          <div class="quiet-box">
+            <strong>No uploaded lessons yet.</strong>
+            <p>Ask the teacher to upload a chapter PDF before using lesson-backed answers.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const context = lesson.context;
+      pill.className = 'pill';
+      pill.textContent = `${lesson.chunkCount || 0} chunks`;
+      summary.innerHTML = `
+        <div class="status-list">
+          <div class="status-row"><span>Current lesson</span><strong>${escapeHtml(lesson.subtitle)}</strong></div>
+          <div class="status-row"><span>Subject</span><strong>${escapeHtml(context.subject)}</strong></div>
+          <div class="status-row"><span>Class</span><strong>${escapeHtml(context.grade ? `Grade ${context.grade}` : 'Not set')}</strong></div>
+        </div>
+      `;
+    }
+
+    function renderIngestionResult(upload, statusPayload) {
+      const result = document.querySelector('#ingestion-result');
+      const pill = document.querySelector('#ingestion-result-pill');
+      const progress = statusPayload?.progress || {};
+      const status = statusPayload?.status || upload?.status || 'waiting';
+      const documentId = upload?.documentId || statusPayload?.documentId || '-';
+      const entities = upload?.entitiesCreated ?? progress.entitiesCreated ?? '-';
+      const chunksCreated = upload?.chunksCreated ?? progress.chunksCreated ?? '-';
+      const chunksEmbedded = upload?.chunksEmbedded ?? progress.chunksEmbedded ?? '-';
+      const percent = progress.percent ?? (status === 'ready' ? 100 : 0);
+      const errorMessage = statusPayload?.errorMessage || upload?.errorMessage || '';
+      const readyCopy = status === 'ready' ? 'Ready for retrieval' : formatStatus(status);
+      pill.className = statusPillClass(status);
+      pill.textContent = formatStatus(status);
+      result.innerHTML = `
+        <div class="status-row"><span>Document</span><strong>${escapeHtml(shortId(documentId))}</strong></div>
+        <div class="status-row"><span>Status</span><strong>${escapeHtml(readyCopy)}</strong></div>
+        <div class="status-row"><span>Progress</span><strong>${escapeHtml(String(percent))}%</strong></div>
+        <div class="status-row"><span>Entities</span><strong>${escapeHtml(String(entities))}</strong></div>
+        <div class="status-row"><span>Chunks</span><strong>${escapeHtml(String(chunksCreated))} / ${escapeHtml(String(chunksEmbedded))}</strong></div>
+        ${errorMessage ? `<div class="status-row"><span>Failure</span><strong>${escapeHtml(errorMessage)}</strong></div>` : ''}
+      `;
+    }
+
+    function shortId(value) {
+      const text = String(value || '-');
+      return text.length > 12 ? `${text.slice(0, 8)}...${text.slice(-4)}` : text;
+    }
+
+    async function loadTeacherDocuments() {
+      const list = document.querySelector('#teacher-documents');
+      const countPill = document.querySelector('#documents-count-pill');
+      if (!list || state.role !== 'teacher') return;
+      if (state.demoMode) {
+        countPill.textContent = '0 documents';
+        renderLibrarySummary([]);
+        renderTeacherKnowledgeSummary([]);
+        list.innerHTML = '<div class="quiet-box"><strong>Backend sign-in required.</strong><p>Use the teacher account against running services to upload and list PDFs.</p></div>';
+        return;
+      }
+
+      try {
+        const payload = await apiJson('/api/rag/documents');
+        setConnection(true, 'Online');
+        renderTeacherDocuments(payload.documents || []);
+      } catch (error) {
+        countPill.textContent = '0 documents';
+        renderLibrarySummary([]);
+        renderTeacherKnowledgeSummary([]);
+        list.innerHTML = `<div class="quiet-box"><strong>Documents unavailable.</strong><p>${escapeHtml(error.message)}</p></div>`;
+        if (!error.status) setConnection(false, 'Offline');
+      }
+    }
+
+    function renderTeacherDocuments(documents) {
+      const list = document.querySelector('#teacher-documents');
+      const countPill = document.querySelector('#documents-count-pill');
+      countPill.textContent = `${documents.length} ${documents.length === 1 ? 'document' : 'documents'}`;
+      renderLibrarySummary(documents);
+      renderTeacherKnowledgeSummary(documents);
+      if (!documents.length) {
+        list.innerHTML = '<div class="quiet-box"><strong>No PDFs indexed yet.</strong><p>Uploaded teacher documents will appear here after ingestion.</p></div>';
+        return;
+      }
+      list.innerHTML = documents.map(item => {
+        const metadata = item.metadata || {};
+        const subtitle = [
+          metadata.subject,
+          metadata.grade ? `Grade ${metadata.grade}` : '',
+          metadata.chapterNumber ? `Chapter ${metadata.chapterNumber}` : '',
+          metadata.chapterName,
+        ].filter(Boolean).join(' - ');
+        const entityCount = Number(item.entityCount || 0);
+        const chunkCount = Number(item.chunkCount || 0);
+        const statusCopy = item.status === 'ready' ? 'Ready' : formatStatus(item.status);
+        return `
+          <div class="list-item" data-document-id="${escapeHtml(item.documentId)}">
+            <div class="tile-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <div>
+              <div class="item-title">${escapeHtml(item.filename || 'Uploaded PDF')}</div>
+              <div class="item-subtitle">${escapeHtml(subtitle || 'Document metadata unavailable')}</div>
+              <div class="small">${entityCount} entities - ${chunkCount} chunks</div>
+            </div>
+            <div class="actions">
+              <span class="${statusPillClass(item.status)}">${escapeHtml(statusCopy)}</span>
+              <button class="btn icon-only" type="button" data-document-status="${escapeHtml(item.documentId)}" aria-label="Load document status">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderLibrarySummary(documents) {
+      const summary = document.querySelector('#document-library-summary');
+      if (!summary) return;
+      const ready = documents.filter(item => item.status === 'ready').length;
+      const failed = documents.filter(item => item.status === 'failed').length;
+      const chunks = documents.reduce((sum, item) => sum + Number(item.chunkCount || 0), 0);
+      const entities = documents.reduce((sum, item) => sum + Number(item.entityCount || 0), 0);
+      summary.innerHTML = `
+        <div class="library-stat"><span>Ready</span><strong>${ready}</strong></div>
+        <div class="library-stat"><span>Failed</span><strong>${failed}</strong></div>
+        <div class="library-stat"><span>Chunks / Entities</span><strong>${chunks} / ${entities}</strong></div>
+      `;
+    }
+
+    function renderTeacherKnowledgeSummary(documents) {
+      const target = document.querySelector('#teacher-knowledge-list');
+      if (!target) return;
+      const readyDocs = documents.filter(item => item.status === 'ready');
+      if (!readyDocs.length) {
+        target.innerHTML = `
+          <div class="quiet-box">
+            <strong>No indexed chapters yet.</strong>
+            <p>Upload chapter PDFs so tutor answers can use lesson-backed context.</p>
+          </div>
+        `;
+        return;
+      }
+
+      target.innerHTML = readyDocs.slice(0, 4).map(item => {
+        const metadata = item.metadata || {};
+        const title = [
+          metadata.subject || 'Subject',
+          metadata.grade ? `Grade ${metadata.grade}` : '',
+          metadata.chapterNumber ? `Chapter ${metadata.chapterNumber}` : '',
+        ].filter(Boolean).join(' - ');
+        const detail = metadata.chapterName || item.filename || 'Indexed chapter';
+        const chunks = Number(item.chunkCount || 0);
+        return `
+          <div class="status-row">
+            <span>${escapeHtml(title)}<br><small>${escapeHtml(detail)}</small></span>
+            <strong>${chunks} chunks</strong>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function statusPillClass(status) {
+      if (status === 'ready') return 'pill';
+      if (status === 'failed') return 'pill red';
+      return 'pill amber';
+    }
+
+    function startIngestionStatusPolling(documentId, uploadPayload) {
+      clearTimeout(state.ingestionPollTimer);
+      if (!documentId || state.demoMode) return;
+      state.activeIngestionDocumentId = documentId;
+
+      const poll = async () => {
+        try {
+          const statusPayload = await apiJson(`/api/rag/upload/${encodeURIComponent(documentId)}/status`);
+          renderIngestionResult(uploadPayload, statusPayload);
+          const percent = statusPayload.progress?.percent ?? 0;
+          if (statusPayload.status === 'ready') {
+            setIngestionState('complete', 'Ready for retrieval', 100);
+            await loadTeacherDocuments();
+            return;
+          }
+          if (statusPayload.status === 'failed') {
+            setIngestionState('failed', statusPayload.errorMessage || 'Ingestion failed', percent);
+            await loadTeacherDocuments();
+            return;
+          }
+          setIngestionState('processing', formatStatus(statusPayload.progress?.stage || statusPayload.status), percent);
+          state.ingestionPollTimer = setTimeout(poll, 1400);
+        } catch (error) {
+          setIngestionState('failed', error.message, 0);
+          if (!error.status) setConnection(false, 'Offline');
+        }
+      };
+
+      poll();
+    }
+
+    async function loadDocumentIngestionStatus(documentId) {
+      if (!documentId || state.demoMode) return;
+      clearTimeout(state.ingestionPollTimer);
+      state.activeIngestionDocumentId = documentId;
+      setIngestionState('processing', 'Loading document status', 15);
+
+      try {
+        const statusPayload = await apiJson(`/api/rag/upload/${encodeURIComponent(documentId)}/status`);
+        const percent = statusPayload.progress?.percent ?? 0;
+        renderIngestionResult({ documentId }, statusPayload);
+
+        if (statusPayload.status === 'ready') {
+          setIngestionState('complete', 'Ready for retrieval', 100);
+          await loadTeacherDocuments();
+          return;
+        }
+        if (statusPayload.status === 'failed') {
+          setIngestionState('failed', statusPayload.errorMessage || 'Ingestion failed', percent);
+          await loadTeacherDocuments();
+          return;
+        }
+
+        setIngestionState('processing', formatStatus(statusPayload.progress?.stage || statusPayload.status), percent);
+        state.ingestionPollTimer = setTimeout(() => {
+          loadDocumentIngestionStatus(documentId);
+        }, 1400);
+      } catch (error) {
+        setIngestionState('failed', error.message, 0);
+        if (!error.status) setConnection(false, 'Offline');
+      }
+    }
+
+    document.querySelector('#ingestion-file').addEventListener('change', event => {
+      const file = event.target.files?.[0];
+      document.querySelector('#ingestion-file-label').textContent = file ? file.name : 'Select PDF';
+    });
+
+    document.querySelector('#ingestion-form').addEventListener('reset', () => {
+      clearTimeout(state.ingestionPollTimer);
+      setTimeout(() => {
+        document.querySelector('#ingestion-file-label').textContent = 'Select PDF';
+        setIngestionState('ready', 'Ready', 0);
+        document.querySelector('#ingestion-status').textContent = 'Ready for a teacher PDF.';
+      }, 0);
+    });
+
+    document.querySelector('#ingestion-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submitButton = document.querySelector('#ingestion-submit-btn');
+      const file = document.querySelector('#ingestion-file').files?.[0];
+      if (!file) {
+        setIngestionState('failed', 'Select a PDF first', 0);
+        return;
+      }
+      if (state.demoMode) {
+        setIngestionState('failed', 'Backend sign-in required for upload', 0);
+        return;
+      }
+
+      clearTimeout(state.ingestionPollTimer);
+      submitButton.disabled = true;
+      setIngestionState('uploading', 'Uploading PDF', 25);
+
+      try {
+        const payload = await apiForm('/api/rag/upload', new FormData(form));
+        setConnection(true, 'Online');
+        renderIngestionResult(payload, null);
+        setIngestionState(
+          payload.status === 'ready' ? 'complete' : 'processing',
+          payload.status === 'ready' ? 'Ready for retrieval' : formatStatus(payload.status),
+          payload.status === 'ready' ? 100 : 65
+        );
+        startIngestionStatusPolling(payload.documentId, payload);
+        await loadTeacherDocuments();
+      } catch (error) {
+        setIngestionState('failed', error.message, 0);
+        if (!error.status) setConnection(false, 'Offline');
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    document.querySelector('#refresh-documents-btn').addEventListener('click', loadTeacherDocuments);
+
+    document.querySelector('#teacher-documents').addEventListener('click', event => {
+      const button = event.target.closest('[data-document-status]');
+      if (!button) return;
+      loadDocumentIngestionStatus(button.dataset.documentStatus);
+    });
+
+    async function loadChatSessions() {
+      const list = document.querySelector('#chat-session-list');
+      if (!list || state.role !== 'student') return;
+
+      if (state.demoMode) {
+        renderChatSessions([]);
+        return;
+      }
+
+      try {
+        const payload = await apiJson('/api/ai/chat/sessions');
+        state.chatSessions = payload.sessions || [];
+        renderChatSessions(state.chatSessions);
+      } catch (error) {
+        state.chatSessions = [];
+        list.innerHTML = `<div class="quiet-box"><strong>Saved chats unavailable.</strong><p>${escapeHtml(error.message)}</p></div>`;
+        if (!error.status) setConnection(false, 'Offline');
+      }
+    }
+
+    function renderChatSessions(sessions) {
+      const list = document.querySelector('#chat-session-list');
+      if (!list) return;
+
+      if (!sessions.length) {
+        list.innerHTML = `
+          <div class="quiet-box">
+            <strong>No saved chats yet.</strong>
+            <p>Ask the tutor once and the conversation will appear here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = sessions.map(session => {
+        const active = session.sessionId === state.sessionId ? ' active' : '';
+        const title = session.chapterName || session.subject || 'Tutor chat';
+        const meta = [
+          session.subject,
+          session.grade ? `Grade ${session.grade}` : '',
+          session.chapterNumber ? `Chapter ${session.chapterNumber}` : '',
+          `${Number(session.messageCount || 0)} messages`,
+          formatSessionDate(session.latestActivityAt),
+        ].filter(Boolean).join(' - ');
+        const preview = session.lastMessage?.content || 'No messages yet';
+        return `
+          <button class="chat-session-card${active}" type="button" data-chat-session="${escapeHtml(session.sessionId)}">
+            <div class="chat-session-title">${escapeHtml(title)}</div>
+            <div class="chat-session-meta">${escapeHtml(meta)}</div>
+            <div class="chat-session-preview">${escapeHtml(preview)}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    async function openChatSession(sessionId) {
+      const session = state.chatSessions.find(item => item.sessionId === sessionId);
+      if (!session) return;
+
+      state.sessionId = session.sessionId;
+      applyLessonFromSession(session);
+      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Loading chat';
+      renderChatSessions(state.chatSessions);
+
+      try {
+        const history = await apiJson(`/api/ai/chat/${encodeURIComponent(session.sessionId)}/history`);
+        renderHistoryMessages(history);
+        const latestAssistant = [...history].reverse().find(message => message.role === 'assistant');
+        state.lastAssistantMessageId = latestAssistant ? latestAssistant.messageId : null;
+        document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Continued chat';
+      } catch (error) {
+        document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Could not load';
+        if (!error.status) setConnection(false, 'Offline');
+      }
+    }
+
+    function applyLessonFromSession(session) {
+      const match = state.availableLessons.find(lesson => {
+        const context = lesson.context || {};
+        return cleanText(context.subject).toLowerCase() === cleanText(session.subject).toLowerCase()
+          && Number(context.grade || 0) === Number(session.grade || 0)
+          && Number(context.chapterNumber || 0) === Number(session.chapterNumber || 0)
+          && cleanText(context.chapterName).toLowerCase() === cleanText(session.chapterName).toLowerCase();
+      });
+      if (!match) return;
+      state.selectedLessonKey = match.key;
+      syncSubjectSelection();
+      renderSelectedLessonSummary();
+    }
+
+    function renderHistoryMessages(history) {
+      const thread = document.querySelector('#chat-thread');
+      thread.innerHTML = '';
+      if (!history.length) {
+        renderEmptyChatState();
+        return;
+      }
+
+      history.forEach(message => {
+        const role = message.role === 'user' ? 'student' : 'tutor';
+        const node = appendMessage(role, '', formatSessionDate(message.timestamp));
+        if (role === 'tutor') setMessageRichText(node, message.content);
+        else setMessageText(node, message.content);
+      });
+      scrollChatToBottom();
+    }
+
+    function startNewTutorChat() {
+      state.sessionId = null;
+      state.lastAssistantMessageId = null;
+      state.chatVideoRecommendations = [];
+      renderEmptyChatState();
+      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Ready';
+      renderChatSessions(state.chatSessions);
+    }
+
+    function appendMessage(role, text, meta) {
+      const thread = document.querySelector('#chat-thread');
+      clearChatEmptyState();
+      const message = document.createElement('div');
+      message.className = `message ${role}`;
+      const body = document.createElement('div');
+      body.className = 'message-body';
+      body.textContent = text;
+      message.appendChild(body);
+      if (meta) {
+        const metaNode = document.createElement('div');
+        metaNode.className = 'message-meta';
+        metaNode.textContent = meta;
+        message.appendChild(metaNode);
+      }
+      thread.appendChild(message);
+      thread.scrollTop = thread.scrollHeight;
+      return message;
+    }
+
+    function clearChatEmptyState() {
+      const empty = document.querySelector('#chat-empty');
+      if (empty) empty.remove();
+    }
+
+    function renderEmptyChatState() {
+      const thread = document.querySelector('#chat-thread');
+      thread.innerHTML = `
+        <div class="chat-empty" id="chat-empty">
+          <strong>Start from your selected lesson.</strong>
+          <span>Ask a doubt, request an example, or ask for a video for the current chapter.</span>
+        </div>
+      `;
+    }
+
+    function scrollChatToBottom() {
+      const thread = document.querySelector('#chat-thread');
+      if (thread) thread.scrollTop = thread.scrollHeight;
+    }
+
+    function setMessageText(message, text) {
+      const body = message.querySelector('.message-body');
+      if (!body) return;
+      body.textContent = text;
+      scrollChatToBottom();
+    }
+
+    function setMessageRichText(message, text) {
+      const body = message.querySelector('.message-body');
+      if (!body) return;
+      body.innerHTML = '';
+
+      renderReadableTutorText(body, text);
+      scrollChatToBottom();
+    }
+
+    function renderReadableTutorText(container, text) {
+      const readable = String(text || '')
+        .replace(/\r\n/g, '\n')
+        .replace(/([.:?])\s+\*\s+/g, '$1\n* ')
+        .replace(/\s+(\d+[.)])\s+/g, '\n$1 ');
+      const lines = readable.split('\n');
+      let list = null;
+      let listType = null;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          list = null;
+          listType = null;
+          return;
+        }
+
+        const bullet = trimmed.match(/^[-*]\s+(.*)$/);
+        const numbered = trimmed.match(/^\d+[.)]\s+(.*)$/);
+        if (bullet || numbered) {
+          const desiredListType = numbered ? 'ol' : 'ul';
+          if (!list || listType !== desiredListType) {
+            list = document.createElement(desiredListType);
+            container.appendChild(list);
+            listType = desiredListType;
+          }
+          const item = document.createElement('li');
+          appendInlineTutorText(item, bullet ? bullet[1] : numbered[1]);
+          list.appendChild(item);
+          return;
+        }
+
+        list = null;
+        listType = null;
+        const paragraph = document.createElement('p');
+        appendInlineTutorText(paragraph, trimmed.replace(/^#{1,6}\s+/, ''));
+        container.appendChild(paragraph);
+      });
+    }
+
+    function appendInlineTutorText(parent, text) {
+      const normalized = normalizeTutorText(text);
+      const parts = normalized.split(/(https?:\/\/[^\s]+|\*\*[^*]+\*\*)/g);
+      parts.forEach(part => {
+        if (/^https?:\/\//.test(part)) {
+          const link = document.createElement('a');
+          link.href = safeUrl(part);
+          link.target = '_blank';
+          link.rel = 'noreferrer';
+          link.textContent = part;
+          parent.appendChild(link);
+          return;
+        }
+        if (/^\*\*[^*]+\*\*$/.test(part)) {
+          const strong = document.createElement('strong');
+          strong.textContent = part.slice(2, -2);
+          parent.appendChild(strong);
+          return;
+        }
+        parent.appendChild(document.createTextNode(part.replace(/\*/g, '')));
+      });
+    }
+
+    function normalizeTutorText(text) {
+      return String(text || '')
+        .replace(/\$([^$]+)\$/g, '$1')
+        .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
+        .replace(/\\times/g, '×')
+        .replace(/\^2\b/g, '²')
+        .replace(/\s+\*/g, ' *')
+        .trim();
+    }
+
+    function setMessageMeta(message, text) {
+      let meta = message.querySelector('.message-meta');
+      if (!meta) {
+        meta = document.createElement('div');
+        meta.className = 'message-meta';
+        message.appendChild(meta);
+      }
+      meta.textContent = text;
+    }
+
+    async function ensureSession() {
+      if (state.sessionId) return state.sessionId;
+      const lessonContext = readLessonContext();
+      const payload = await apiJson('/api/ai/chat/session', {
+        method: 'POST',
+        body: lessonContext,
+      });
+      state.sessionId = payload.sessionId;
+      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Session active';
+      loadChatSessions();
+      return state.sessionId;
+    }
+
+    function readLessonContext() {
+      const lesson = selectedLesson();
+      if (!lesson) return { subject: 'General' };
+      return lesson.context;
+    }
+
+    function resetTutorSessionForLessonChange() {
+      syncSubjectSelection();
+      state.sessionId = null;
+      state.lastAssistantMessageId = null;
+      renderSelectedLessonSummary();
+      renderEmptyChatState();
+      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Ready';
+      renderChatSessions(state.chatSessions);
+    }
+
+    function parseSseChunk(chunk, onToken, onVideoRecommendation, onAnswerContext, onStatus) {
+      let eventName = 'message';
+      const dataLines = [];
+      chunk.split('\n').forEach(line => {
+        if (line.startsWith('event:')) eventName = line.slice(6).trim();
+        if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
+      });
+      const raw = dataLines.join('\n');
+      if (!raw || raw === '[DONE]') return null;
+      if (eventName === 'status') {
+        const data = JSON.parse(raw);
+        onStatus?.(data);
+      }
+      if (eventName === 'token') {
+        const data = JSON.parse(raw);
+        onToken(data.text || '');
+      }
+      if (eventName === 'video_recommendations') {
+        const data = JSON.parse(raw);
+        onVideoRecommendation?.(data);
+      }
+      if (eventName === 'answer_context') {
+        const data = JSON.parse(raw);
+        onAnswerContext?.(data);
+      }
+      if (eventName === 'error') {
+        const data = JSON.parse(raw);
+        return data.error || 'AI response failed.';
+      }
+      return null;
+    }
+
+    async function streamTutorAnswer(message, targetNode) {
+      await ensureSession();
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: state.sessionId, message }),
+      });
+      if (!response.ok || !response.body) {
+        throw new Error('AI chat endpoint is unavailable.');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let answer = '';
+      let streamError = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split('\n\n');
+        buffer = chunks.pop() || '';
+        for (const chunk of chunks) {
+          streamError = parseSseChunk(chunk, text => {
+            answer += text;
+            setMessageRichText(targetNode, answer);
+          }, recommendation => {
+            handleChatVideoRecommendation(recommendation);
+            appendVideoCardsToMessage(targetNode, recommendation);
+          }, context => {
+            const ragChunkCount = Number(context.ragChunkCount || 0);
+            const label = context.source === 'rag' && ragChunkCount > 0
+              ? `From your lesson - ${ragChunkCount} source chunks`
+              : 'General tutor answer - no matching lesson source found';
+            setMessageMeta(targetNode, label);
+          }, status => {
+            if (status.status === 'refused') {
+              setMessageMeta(targetNode, 'Blocked by child safety layer');
+            }
+          }) || streamError;
+        }
+        if (streamError) throw new Error(streamError);
+      }
+
+      if (!answer.trim()) {
+        setMessageText(targetNode, "I don't have information on that yet.");
+      } else {
+        setMessageRichText(targetNode, answer);
+      }
+      await refreshLatestAssistantMessageId();
+      document.querySelector('#session-pill').innerHTML = '<span class="dot"></span>Response saved';
+      loadChatSessions();
+      loadStudentDashboard();
+    }
+
+    async function refreshLatestAssistantMessageId() {
+      if (!state.sessionId) return;
+      try {
+        const history = await apiJson(`/api/ai/chat/${state.sessionId}/history`);
+        const latest = [...history].reverse().find(message => message.role === 'assistant');
+        state.lastAssistantMessageId = latest ? latest.messageId : null;
+      } catch (error) {
+        state.lastAssistantMessageId = null;
+      }
+    }
+
+    function demoTutorReply(message) {
+      if (message.toLowerCase().includes('photo')) {
+        return 'Photosynthesis is the process where green plants use sunlight, water, and carbon dioxide to make food. Oxygen is released as a useful output.';
+      }
+      return 'I can help with this lesson in simple steps. First tell me the subject and the exact part that is confusing.';
+    }
+
+    document.querySelector('#new-chat-btn').addEventListener('click', startNewTutorChat);
+    document.querySelector('#refresh-chat-sessions-btn').addEventListener('click', loadChatSessions);
+    document.querySelector('#chat-session-list').addEventListener('click', event => {
+      const button = event.target.closest('[data-chat-session]');
+      if (!button) return;
+      openChatSession(button.dataset.chatSession);
+    });
+
+    document.querySelector('#chat-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = document.querySelector('#chat-input');
+      const sendButton = event.submitter || event.currentTarget.querySelector('button[type="submit"]');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage('student', text);
+      input.value = '';
+      sendButton.disabled = true;
+
+      const tutorNode = appendMessage('tutor', '', state.demoMode ? 'Demo tutor response' : 'Streaming from AI service');
+      setMessageText(tutorNode, state.demoMode ? demoTutorReply(text) : 'Thinking...');
+
+      if (state.demoMode) {
+        sendButton.disabled = false;
+        return;
+      }
+
+      try {
+        await streamTutorAnswer(text, tutorNode);
+      } catch (error) {
+        setMessageText(tutorNode, error.message || 'The AI service could not answer. Try again after backend services are running.');
+        if (!error.status) setConnection(false, 'Offline');
+      } finally {
+        sendButton.disabled = false;
+      }
+    });
+
+    document.querySelector('#subject-list').addEventListener('click', event => {
+      const card = event.target.closest('[data-lesson-key]');
+      if (!card) return;
+      const nextKey = card.dataset.lessonKey;
+      if (nextKey === state.selectedLessonKey) return;
+      state.selectedLessonKey = nextKey;
+      resetTutorSessionForLessonChange();
+    });
+
+    /* Theme */
+    const THEME_KEY = 'roognis-theme';
+
+    function applyTheme(theme) {
+      const next = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = next;
+      const toggle = document.querySelector('#theme-toggle');
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', String(next === 'dark'));
+        toggle.setAttribute('aria-label', next === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+      }
+    }
+
+    function storedTheme() {
+      try {
+        return localStorage.getItem(THEME_KEY);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function storeTheme(theme) {
+      try {
+        localStorage.setItem(THEME_KEY, theme);
+      } catch (error) {
+        /* storage unavailable — theme stays for this session only */
+      }
+    }
+
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+    applyTheme(storedTheme() || (systemDark.matches ? 'dark' : 'light'));
+
+    systemDark.addEventListener('change', event => {
+      if (!storedTheme()) applyTheme(event.matches ? 'dark' : 'light');
+    });
+
+    document.querySelector('#theme-toggle').addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      storeTheme(next);
+    });
+
+    /* Image studio — scaffolded panel, generation not wired up yet */
+    const imageStudio = document.querySelector('#image-studio');
+    const imageStudioScrim = document.querySelector('#image-studio-scrim');
+    const openImageStudioBtn = document.querySelector('#open-image-studio-btn');
+
+    function setImageStudioOpen(open) {
+      openImageStudioBtn.setAttribute('aria-expanded', String(open));
+      imageStudio.setAttribute('aria-hidden', String(!open));
+
+      if (open) {
+        imageStudio.hidden = false;
+        imageStudioScrim.hidden = false;
+        requestAnimationFrame(() => {
+          imageStudio.classList.add('open');
+          imageStudioScrim.classList.add('open');
+        });
+        document.querySelector('#close-image-studio-btn').focus();
+        return;
+      }
+
+      imageStudio.classList.remove('open');
+      imageStudioScrim.classList.remove('open');
+      openImageStudioBtn.focus();
+
+      const settle = () => {
+        imageStudio.hidden = true;
+        imageStudioScrim.hidden = true;
+      };
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        settle();
+      } else {
+        imageStudio.addEventListener('transitionend', settle, { once: true });
+      }
+    }
+
+    openImageStudioBtn.addEventListener('click', () => setImageStudioOpen(true));
+    document.querySelector('#close-image-studio-btn').addEventListener('click', () => setImageStudioOpen(false));
+    imageStudioScrim.addEventListener('click', () => setImageStudioOpen(false));
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && imageStudio.classList.contains('open')) setImageStudioOpen(false);
+    });
+
+    document.querySelector('#rating-buttons').addEventListener('click', event => {
+      const button = event.target.closest('[data-rating]');
+      if (!button) return;
+      state.feedbackRating = Number(button.dataset.rating);
+      document.querySelectorAll('#rating-buttons button').forEach(item => {
+        item.classList.toggle('active', item === button);
+      });
+    });
+
+    document.querySelector('#feedback-btn').addEventListener('click', async () => {
+      const status = document.querySelector('#feedback-status');
+      const comment = document.querySelector('#feedback-comment').value.trim();
+      const button = document.querySelector('#feedback-btn');
+      if (state.demoMode) {
+        status.textContent = 'Demo feedback captured locally. Sign in with backend to save feedback.';
+        return;
+      }
+      if (!state.lastAssistantMessageId) {
+        status.textContent = 'Send a tutor message first, then rate the saved response.';
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        status.textContent = 'Saving feedback...';
+        await apiJson('/api/ai/feedback', {
+          method: 'POST',
+          body: {
+            messageId: state.lastAssistantMessageId,
+            sessionId: state.sessionId,
+            rating: state.feedbackRating,
+            comment,
+          },
+        });
+        status.textContent = 'Feedback saved.';
+        loadStudentDashboard();
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    async function pollImageJob(jobId) {
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const job = await apiJson(`/api/ai/image/${jobId}/status`);
+        document.querySelector('#image-status').textContent = job.status;
+        if (job.status === 'done' && job.imageUrl) return job;
+        if (job.status === 'failed') throw new Error(job.failureReason || 'Image generation failed.');
+        await new Promise(resolve => setTimeout(resolve, 1200));
+      }
+      throw new Error('Image job is still running. Check status again later.');
+    }
+
+    function formatImageError(message) {
+      const text = String(message || '');
+      const normalized = text.toLowerCase();
+      if (normalized.includes('quota') || normalized.includes('429') || normalized.includes('too_many_requests')) {
+        return 'Image generation is connected, but Gemini image quota is exhausted for this project. Try again after quota resets or switch image provider.';
+      }
+      if (normalized.includes('mime_type') || normalized.includes('response_format')) {
+        return 'Image provider rejected the requested output format.';
+      }
+      return text.length > 180 ? `${text.slice(0, 177)}...` : text;
+    }
+
+    document.querySelector('#generate-btn').addEventListener('click', async () => {
+      const prompt = document.querySelector('#image-prompt').value.trim();
+      const status = document.querySelector('#image-status');
+      const note = document.querySelector('#image-note');
+      const image = document.querySelector('#generated-image');
+      const placeholder = document.querySelector('#diagram-placeholder');
+      const button = document.querySelector('#generate-btn');
+
+      if (!prompt) return;
+      status.textContent = 'Queued';
+      note.textContent = '';
+      button.disabled = true;
+
+      if (state.demoMode) {
+        setTimeout(() => {
+          status.textContent = 'Demo done';
+          note.textContent = 'Sign in with backend to generate a real image.';
+          button.disabled = false;
+        }, 500);
+        return;
+      }
+
+      try {
+        const queued = await apiJson('/api/ai/image', {
+          method: 'POST',
+          body: { prompt },
+        });
+        const job = await pollImageJob(queued.jobId);
+        image.src = job.imageUrl;
+        image.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        status.textContent = 'Done';
+        loadStudentDashboard();
+      } catch (error) {
+        status.textContent = 'Failed';
+        note.textContent = formatImageError(error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    const fallbackTopics = [
+      {
+        topic: 'plants',
+        label: 'Plant nutrition',
+        description: 'Photosynthesis and how plants make food.',
+        videos: [
+          { title: 'Plant nutrition basics', provider: 'Curated lesson', durationMinutes: 5, url: '#' },
+        ],
+      },
+      {
+        topic: 'fractions',
+        label: 'Fractions basics',
+        description: 'Parts of a whole and simple examples.',
+        videos: [
+          { title: 'Understanding fractions', provider: 'Curated lesson', durationMinutes: 6, url: '#' },
+        ],
+      },
+      {
+        topic: 'pythagorean-theorem',
+        label: 'Pythagorean Theorem',
+        description: 'Right triangle side lengths and a squared plus b squared equals c squared.',
+        videos: [
+          { title: 'Pythagorean theorem lessons', provider: 'Khan Academy', url: 'https://www.khanacademy.org/search?page_search_query=pythagorean%20theorem' },
+        ],
+      },
+    ];
+
+    function handleChatVideoRecommendation(recommendation) {
+      if (!recommendation?.topic || !Array.isArray(recommendation.videos)) return;
+
+      state.chatVideoRecommendations = [
+        recommendation,
+        ...state.chatVideoRecommendations.filter(item => item.topic?.topic !== recommendation.topic.topic),
+      ].slice(0, 5);
+
+      renderChatVideoRecommendations();
+    }
+
+    function appendVideoCardsToMessage(message, recommendation) {
+      if (!message || !Array.isArray(recommendation?.videos) || !recommendation.videos.length) return;
+
+      let holder = message.querySelector('.message-video-results');
+      if (!holder) {
+        holder = document.createElement('div');
+        holder.className = 'message-video-results';
+        message.appendChild(holder);
+      }
+
+      holder.innerHTML = recommendation.videos.slice(0, 2).map(video => `
+        <div class="message-video-card">
+          ${video.thumbnailUrl ? `<img src="${safeUrl(video.thumbnailUrl)}" alt="">` : '<div class="tile-icon blue"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></div>'}
+          <div>
+            <div class="message-video-card-title">${escapeHtml(video.title || 'Recommended lesson video')}</div>
+            <div class="message-video-card-meta">${escapeHtml(video.source || 'Education video')}${video.durationSeconds ? ` - ${formatVideoDuration(video.durationSeconds)}` : ''}</div>
+          </div>
+          <a class="btn" href="${safeUrl(video.url)}" target="_blank" rel="noreferrer">Open</a>
+        </div>
+      `).join('');
+    }
+
+    function formatVideoDuration(seconds) {
+      const total = Number(seconds || 0);
+      if (!total) return '';
+      const minutes = Math.floor(total / 60);
+      const remainder = total % 60;
+      return `${minutes}:${String(remainder).padStart(2, '0')}`;
+    }
+
+    function renderChatVideoRecommendations() {
+      const panel = document.querySelector('#chat-video-panel');
+      const list = document.querySelector('#chat-video-recommendations');
+      if (!state.chatVideoRecommendations.length) {
+        panel.classList.add('hidden');
+        list.innerHTML = '';
+        return;
+      }
+
+      panel.classList.remove('hidden');
+      list.innerHTML = state.chatVideoRecommendations.map(recommendation => {
+        const primary = recommendation.videos[0] || {};
+        return `
+          <div class="list-item">
+            <div class="tile-icon blue">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+            </div>
+            <div>
+              <div class="item-title">${escapeHtml(recommendation.topic.label)}</div>
+              <div class="item-subtitle">${escapeHtml(primary.title || 'Recommended video')}${primary.source ? `, ${escapeHtml(primary.source)}` : ''}</div>
+            </div>
+            <a class="btn" href="${safeUrl(primary.url)}" target="_blank" rel="noreferrer">Open</a>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderVideoTopics(topics) {
+      const list = document.querySelector('#video-topics');
+      if (!topics.length) {
+        list.innerHTML = '<div class="quiet-box"><strong>No static video library.</strong><p>Ask the tutor chat for a video on any school topic. Real-time safe results will be saved above.</p></div>';
+        return;
+      }
+      list.innerHTML = topics.map(topic => `
+        <div class="list-item">
+          <div class="tile-icon blue">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+          </div>
+          <div>
+            <div class="item-title">${escapeHtml(topic.label)}</div>
+            <div class="item-subtitle">${escapeHtml(topic.description || 'Approved learning videos')}</div>
+          </div>
+          <button class="btn" data-topic="${escapeHtml(topic.topic)}">Open</button>
+        </div>
+      `).join('');
+    }
+
+    function renderVideoDetail(topic) {
+      const videos = topic.videos || [];
+      const detail = document.querySelector('#video-detail');
+      if (!videos.length) {
+        detail.innerHTML = '<div class="quiet-box"><strong>No selected result.</strong><p>Video results now come from real-time tutor chat requests.</p></div>';
+        return;
+      }
+      detail.innerHTML = videos.map(video => `
+        <div class="list-item">
+          <div class="tile-icon">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+          </div>
+          <div>
+            <div class="item-title">${escapeHtml(video.title || video.label || 'Lesson video')}</div>
+            <div class="item-subtitle">${escapeHtml(video.source || video.provider || 'Approved source')}${video.durationSeconds ? `, ${Math.round(video.durationSeconds / 60)} min` : ''}</div>
+          </div>
+          <a class="btn" href="${safeUrl(video.url)}" target="_blank" rel="noreferrer">Open</a>
+        </div>
+      `).join('');
+    }
+
+    async function loadVideoTopics() {
+      const pill = document.querySelector('#video-topic-pill');
+      try {
+        if (state.demoMode) throw new Error('demo');
+        const topics = await apiJson('/api/ai/video/topics');
+        renderVideoTopics(topics);
+        pill.textContent = 'Real-time';
+        if (topics[0]) openVideoTopic(topics[0].topic);
+        if (!topics[0]) renderVideoDetail({ videos: [] });
+      } catch (error) {
+        if (state.demoMode) {
+          renderVideoTopics(fallbackTopics);
+          renderVideoDetail(fallbackTopics[0]);
+          pill.textContent = 'Demo';
+          return;
+        }
+        document.querySelector('#video-topics').innerHTML = '<div class="quiet-box"><strong>Video topics unavailable.</strong><p>Sign in with a student account and make sure the AI service is running.</p></div>';
+        document.querySelector('#video-detail').innerHTML = '';
+        pill.textContent = 'Unavailable';
+      }
+    }
+
+    async function openVideoTopic(topicName) {
+      try {
+        if (state.demoMode) throw new Error('demo');
+        const topic = await apiJson(`/api/ai/video/${encodeURIComponent(topicName)}`);
+        renderVideoDetail(topic);
+      } catch (error) {
+        if (state.demoMode) {
+          const topic = fallbackTopics.find(item => item.topic === topicName) || fallbackTopics[0];
+          renderVideoDetail(topic);
+          return;
+        }
+        document.querySelector('#video-detail').innerHTML = '<div class="quiet-box"><strong>Topic unavailable.</strong><p>The selected video topic could not be loaded from the AI service.</p></div>';
+      }
+    }
+
+    document.querySelector('#video-topics').addEventListener('click', event => {
+      const button = event.target.closest('[data-topic]');
+      if (!button) return;
+      openVideoTopic(button.dataset.topic);
+    });
+
+    document.querySelector('#reload-videos-btn').addEventListener('click', loadVideoTopics);
+
+    function setText(selector, value) {
+      const node = document.querySelector(selector);
+      if (node) node.textContent = value;
+    }
+
+    function activeRouteId() {
+      return document.querySelector('.view.active')?.id || '';
+    }
+
+    function shouldTrackStudentActivity() {
+      return state.role === 'student'
+        && state.apiOnline
+        && !state.demoMode
+        && !document.hidden
+        && !appShell.classList.contains('hidden');
+    }
+
+    function activitySubject() {
+      return selectedLesson()?.context?.subject || 'General';
+    }
+
+    function startStudentActivityTracking() {
+      state.lastActivityTickAt = Date.now();
+      window.setInterval(trackStudentActivityTick, 10000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) flushStudentActivity({ force: true });
+        state.lastActivityTickAt = Date.now();
+      });
+      window.addEventListener('beforeunload', () => {
+        flushStudentActivity({ keepalive: true, force: true });
+      });
+    }
+
+    function trackStudentActivityTick() {
+      const now = Date.now();
+      const elapsedSeconds = Math.min(30, Math.max(0, Math.round((now - state.lastActivityTickAt) / 1000)));
+      state.lastActivityTickAt = now;
+
+      if (!shouldTrackStudentActivity()) return;
+      state.pendingActiveSeconds += elapsedSeconds;
+      if (state.pendingActiveSeconds >= 30) flushStudentActivity();
+    }
+
+    async function flushStudentActivity(options = {}) {
+      const canFlush = options.force
+        ? state.role === 'student' && state.apiOnline && !state.demoMode && !appShell.classList.contains('hidden')
+        : shouldTrackStudentActivity();
+      if (state.activityFlushInFlight || !canFlush) return;
+      const activeSeconds = Math.round(state.pendingActiveSeconds);
+      if (activeSeconds < 5) return;
+
+      state.pendingActiveSeconds = 0;
+      state.activityFlushInFlight = true;
+      try {
+        const response = await fetch('/api/analytics/student/activity', {
+          method: 'POST',
+          credentials: 'include',
+          keepalive: Boolean(options.keepalive),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            activeSeconds,
+            route: activeRouteId(),
+            subject: activitySubject(),
+          }),
+        });
+        if (!response.ok) state.pendingActiveSeconds += activeSeconds;
+        if (response.ok && activeRouteId() === 'student-mvp') loadStudentDashboard();
+      } catch (error) {
+        state.pendingActiveSeconds += activeSeconds;
+      } finally {
+        state.activityFlushInFlight = false;
+      }
+    }
+
+    function formatSessionDate(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function formatDuration(seconds) {
+      const total = Math.max(Number(seconds || 0), 0);
+      if (total < 60) return `${Math.round(total)}s`;
+      const minutes = Math.round(total / 60);
+      if (minutes < 60) return `${minutes}m`;
+      const hours = Math.floor(minutes / 60);
+      const remaining = minutes % 60;
+      return remaining ? `${hours}h ${remaining}m` : `${hours}h`;
+    }
+
+    function formatPercent(value) {
+      return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}%` : '-';
+    }
+
+    function renderProgressList(selector, courses) {
+      const container = document.querySelector(selector);
+      if (!container) return;
+      if (!courses?.length) {
+        container.innerHTML = '<div class="quiet-box"><strong>No course progress yet.</strong><p>Progress appears after tutor, diagram, video, or quiz activity.</p></div>';
+        return;
+      }
+
+      container.innerHTML = courses.slice(0, 4).map(course => `
+        <div class="list-item">
+          <div class="tile-icon">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 19h16M5 17l4-8 4 5 3-4 3 7"/></svg>
+          </div>
+          <div>
+            <div class="item-title">${escapeHtml(course.subject)}</div>
+            <div class="item-subtitle">${escapeHtml(course.nextAction || 'Continue learning')} · ${Number(course.activityCount || 0)} activities</div>
+          </div>
+          <span class="pill">${formatPercent(course.progressPercent)}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderWeakAreas(selector, areas) {
+      const container = document.querySelector(selector);
+      if (!container) return;
+      if (!areas?.length) {
+        container.innerHTML = '<div class="quiet-box"><strong>No weak areas yet.</strong><p>Quiz graded events can add weak areas here.</p></div>';
+        return;
+      }
+
+      container.innerHTML = areas.map(area => `
+        <div class="list-item">
+          <div class="tile-icon amber">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="m10.3 3.9-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.1l-8-14a2 2 0 0 0-3.4 0z"/></svg>
+          </div>
+          <div>
+            <div class="item-title">${escapeHtml(area.label)}</div>
+            <div class="item-subtitle">${Number(area.count || 0)} signal${Number(area.count || 0) === 1 ? '' : 's'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecentActivity(selector, events) {
+      const container = document.querySelector(selector);
+      if (!container) return;
+      if (!events?.length) {
+        container.innerHTML = '<div class="quiet-box"><strong>No learning activity yet.</strong><p>Activity appears after tutor, diagrams, videos, or quizzes.</p></div>';
+        return;
+      }
+
+      container.innerHTML = events.map(event => `
+        <div class="list-item">
+          <div class="tile-icon blue">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
+          </div>
+          <div>
+            <div class="item-title">${escapeHtml(event.title || event.type)}</div>
+            <div class="item-subtitle">${escapeHtml(event.subject || 'General')} · ${escapeHtml(String(event.type || '').replaceAll('_', ' '))}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadStudentDashboard() {
+      if (state.demoMode) {
+        setText('#student-analytics-pill', 'Demo');
+        return;
+      }
+
+      try {
+        const dashboard = await apiJson('/api/analytics/student/dashboard');
+        setText('#student-streak-value', String(dashboard.learningStreakDays || 0));
+        setText('#student-time-value', formatDuration(dashboard.timeSpentSecondsThisWeek));
+        setText('#student-lessons-value', String(dashboard.lessonsCompletedThisWeek || 0));
+        setText('#student-progress-value', formatPercent(dashboard.practiceProgressPercent));
+        setText('#student-analytics-pill', 'Backend');
+        renderProgressList('#student-course-progress', dashboard.courseProgress || []);
+      } catch (error) {
+        setText('#student-analytics-pill', 'Unavailable');
+      }
+    }
+
+    function renderTeacherActions(actions) {
+      const container = document.querySelector('#teacher-actions-list');
+      if (!container) return;
+      if (!actions?.length) {
+        container.innerHTML = '<div class="quiet-box"><strong>No follow-ups yet.</strong><p>Follow-ups appear after students use tutor, videos, diagrams, or quizzes.</p></div>';
+        return;
+      }
+
+      container.innerHTML = actions.map(action => `
+        <div class="list-item">
+          <div class="tile-icon amber">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 8v5"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div>
+            <div class="item-title">${escapeHtml(action.title)}</div>
+            <div class="item-subtitle">${escapeHtml(action.detail)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadTeacherDashboard() {
+      if (state.demoMode) {
+        setText('#teacher-analytics-pill', 'Demo');
+        return;
+      }
+
+      try {
+        const dashboard = await apiJson('/api/analytics/teacher/dashboard');
+        const quiz = dashboard.activeQuiz || {};
+        setText('#teacher-student-count', String(dashboard.studentCount || 0));
+        setText('#teacher-active-count', String(dashboard.usageStats?.activeStudents7d || 0));
+        setText('#teacher-quiz-status', quiz.status === 'active' ? String(quiz.submittedCount || 0) : 'None');
+        setText('#teacher-quiz-help', quiz.status === 'active'
+          ? `${quiz.title || 'Latest quiz'} · ${quiz.pendingCount || 0} pending`
+          : 'No quiz activity yet. Assigned quizzes and submissions will appear here.');
+        setText('#teacher-avg-score', quiz.averageScorePercent === null || quiz.averageScorePercent === undefined ? '-' : formatPercent(quiz.averageScorePercent));
+        setText('#teacher-analytics-pill', 'Backend');
+
+        const engagement = dashboard.lessonEngagement || [];
+        document.querySelector('#teacher-engagement-list').innerHTML = engagement.map(item => `
+          <div class="status-row"><span>${escapeHtml(item.label)}</span><strong>${Number(item.count || 0)}</strong></div>
+        `).join('');
+        renderWeakAreas('#teacher-weak-areas', dashboard.weakAreas || []);
+        renderTeacherActions(dashboard.nextActions || []);
+      } catch (error) {
+        setText('#teacher-analytics-pill', 'Unavailable');
+      }
+    }
+
+    async function loadParentDashboard(studentId = state.selectedParentStudentId) {
+      if (state.demoMode || !studentId) {
+        setText('#parent-analytics-pill', state.demoMode ? 'Demo' : 'No child');
+        setText('#parent-dashboard-title', 'Linked child progress.');
+        return;
+      }
+
+      try {
+        const dashboard = await apiJson(`/api/analytics/parent/dashboard?studentId=${encodeURIComponent(studentId)}`);
+        setText('#parent-dashboard-title', dashboard.studentName ? `${dashboard.studentName}'s progress.` : 'Linked child progress.');
+        setText('#parent-streak-value', String(dashboard.learningStreakDays || 0));
+        setText('#parent-time-value', formatDuration(dashboard.timeSpentSecondsThisWeek));
+        setText('#parent-quiz-status', dashboard.assignedQuizStatus || 'None');
+        setText('#parent-quiz-help', dashboard.latestQuizScorePercent === null || dashboard.latestQuizScorePercent === undefined
+          ? 'From quiz events when available.'
+          : `Latest score ${formatPercent(dashboard.latestQuizScorePercent)}`);
+        setText('#parent-lessons-value', String(dashboard.lessonsCompletedThisWeek || 0));
+        setText('#parent-analytics-pill', 'Backend');
+        renderRecentActivity('#parent-recent-activity', dashboard.recentActivity || []);
+        renderProgressList('#parent-course-progress', dashboard.courseProgress || []);
+        renderWeakAreas('#parent-weak-areas', dashboard.weakAreas || []);
+      } catch (error) {
+        setText('#parent-dashboard-title', 'Linked child progress.');
+        setText('#parent-analytics-pill', 'Unavailable');
+      }
+    }
+
+    async function loadLinkedChildren() {
+      const container = document.querySelector('#linked-children');
+      if (state.demoMode) {
+        setText('#parent-analytics-pill', 'Demo');
+        return;
+      }
+      try {
+        // Auth removed: no parent accounts or child links, so this is the whole
+        // demo roster rather than "this parent's children".
+        const payload = await apiJson('/api/analytics/students');
+        const children = payload.students || [];
+        state.selectedParentStudentId = children[0]?.studentId || null;
+        if (!children.length) {
+          container.innerHTML = '<div class="quiet-box"><strong>No students in the demo roster.</strong><p>Add entries to services/analytics/lib/demo-roster.js.</p></div>';
+          setText('#parent-analytics-pill', 'No child');
+          setText('#parent-dashboard-title', 'Linked child progress.');
+          return;
+        }
+        container.innerHTML = children.map(child => `
+          <div class="list-item">
+            <div class="tile-icon">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M2 21a6 6 0 0 1 12 0"/></svg>
+            </div>
+            <div>
+              <div class="item-title">${escapeHtml(child.name)}</div>
+              <div class="item-subtitle">${escapeHtml(child.email || 'Linked student')}</div>
+            </div>
+            <button class="btn" data-parent-student="${escapeHtml(child.studentId)}">View</button>
+          </div>
+        `).join('');
+        await loadParentDashboard(state.selectedParentStudentId);
+      } catch (error) {
+        container.innerHTML = '<div class="quiet-box"><strong>Demo roster unavailable.</strong><p>The analytics service could not load the student roster.</p></div>';
+        setText('#parent-analytics-pill', 'Unavailable');
+      }
+    }
+
+    document.querySelector('#linked-children').addEventListener('click', event => {
+      const button = event.target.closest('[data-parent-student]');
+      if (!button) return;
+      state.selectedParentStudentId = button.dataset.parentStudent;
+      loadParentDashboard(state.selectedParentStudentId);
+    });
+
+    document.querySelector('#reload-teacher-analytics-btn').addEventListener('click', loadTeacherDashboard);
+    document.querySelector('#reload-parent-analytics-btn').addEventListener('click', () => loadParentDashboard());
+
+
+    // Auth removed: there is no session to restore. Boot straight into the
+    // student workspace and probe /health only to drive the connection pill.
+    async function bootWorkspace() {
+      document.querySelector('#role-switch').value = 'student';
+      setRole('student', demoUsers.student);
+
+      try {
+        await apiJson('/api/ai/health');
+        setConnection(true, 'Online');
+      } catch (error) {
+        setConnection(Boolean(error.status), error.status ? 'Online' : 'Offline');
+      }
+    }
+
+    startStudentActivityTracking();
+    bootWorkspace();
+  </script>
+</body>
+</html>

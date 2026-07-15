@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: roognis
+
+resources:
+  - namespace.yaml
+  - postgres/pvc.yaml
+  - postgres/statefulset.yaml
+  - postgres/service.yaml
+  - ai/deployment.yaml
+  - ai/service.yaml
+  - rag/deployment.yaml
+  - rag/service.yaml
+  - analytics/deployment.yaml
+  - analytics/service.yaml
+  - frontend/deployment.yaml
+  - frontend/service.yaml
+  - ingress/ingress.yaml

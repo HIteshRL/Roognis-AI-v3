@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics
+  namespace: roognis
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: analytics
+  template:
+    metadata:
+      labels:
+        app: analytics
+    spec:
+      initContainers:
+        - name: db-migrate
+          image: roognis/analytics:latest
+          command: ["sh", "-c", "[ -f prisma/schema.prisma ] && npx prisma db push --schema=prisma/schema.prisma || true"]
+          envFrom:
+            - secretRef:
+                name: analytics-secrets
+      containers:
+        - name: analytics
+          image: roognis/analytics:latest
+          command: ["node", "server.js"]
+          ports:
+            - containerPort: 3004
+          envFrom:
+            - secretRef:
+                name: analytics-secrets
+          env:
+            - name: PORT
+              value: "3004"
+            - name: NODE_ENV
+              value: production
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3004
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

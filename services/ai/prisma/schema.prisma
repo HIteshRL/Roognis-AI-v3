@@ -1,0 +1,92 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["ai_db"]
+}
+
+// Auth removed: sessions are un-owned. There is no studentId/schoolId because
+// nothing authenticates the caller — every session is visible to every caller.
+model ChatSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  subject   String   @db.VarChar(80)
+  board     String?  @db.VarChar(40)
+  curriculum String? @db.VarChar(80)
+  grade     Int?
+  chapterNumber Int? @map("chapter_number")
+  chapterName String? @map("chapter_name") @db.VarChar(160)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  messages Message[]
+
+  @@index([createdAt])
+  @@index([subject])
+  @@index([subject, grade, chapterNumber])
+  @@map("chat_sessions")
+  @@schema("ai_db")
+}
+
+model Message {
+  id        String      @id @default(uuid()) @db.Uuid
+  sessionId String      @map("session_id") @db.Uuid
+  role      MessageRole
+  content   String      @db.Text
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  session  ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  feedback Feedback[]
+
+  @@index([sessionId, createdAt])
+  @@map("messages")
+  @@schema("ai_db")
+}
+
+model ImageJob {
+  id            String         @id @default(uuid()) @db.Uuid
+  prompt        String         @db.Text
+  status        ImageJobStatus @default(queued)
+  imageUrl      String?        @map("image_url") @db.VarChar(500)
+  failureReason String?        @map("failure_reason") @db.Text
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("image_jobs")
+  @@schema("ai_db")
+}
+
+model Feedback {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([createdAt])
+  @@map("feedback")
+  @@schema("ai_db")
+}
+
+enum MessageRole {
+  user
+  assistant
+
+  @@schema("ai_db")
+}
+
+enum ImageJobStatus {
+  queued
+  processing
+  done
+  failed
+
+  @@schema("ai_db")
+}

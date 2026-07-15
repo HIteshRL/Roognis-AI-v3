@@ -1,0 +1,78 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["analytics_db"]
+}
+
+model Event {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      String   @db.VarChar(80)
+  studentId String?  @map("student_id") @db.Uuid
+  schoolId  String   @map("school_id") @db.Uuid
+  subject   String?  @db.VarChar(80)
+  sessionId String?  @map("session_id") @db.Uuid
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([schoolId, type, createdAt])
+  @@index([studentId, createdAt])
+  @@index([sessionId])
+  @@map("events")
+  @@schema("analytics_db")
+}
+
+model Attendance {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  schoolId  String   @map("school_id") @db.Uuid
+  teacherId String   @map("teacher_id") @db.Uuid
+  date      DateTime @db.Date
+  status    String   @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([studentId, date])
+  @@index([schoolId, date])
+  @@map("attendance")
+  @@schema("analytics_db")
+}
+
+model Score {
+  id        String   @id @default(uuid()) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  schoolId  String   @map("school_id") @db.Uuid
+  teacherId String   @map("teacher_id") @db.Uuid
+  subject   String   @db.VarChar(80)
+  testName  String   @map("test_name") @db.VarChar(120)
+  score     Decimal  @db.Decimal(5, 2)
+  maxScore  Decimal  @default(100) @map("max_score") @db.Decimal(5, 2)
+  testDate  DateTime @map("test_date") @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([studentId, subject])
+  @@index([schoolId, testDate])
+  @@map("scores")
+  @@schema("analytics_db")
+}
+
+model ClassAssignment {
+  id        String   @id @default(uuid()) @db.Uuid
+  schoolId  String   @map("school_id") @db.Uuid
+  teacherId String   @map("teacher_id") @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  className String?  @map("class_name") @db.VarChar(120)
+  subject   String   @default("general") @db.VarChar(80)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([teacherId, studentId, subject])
+  @@index([schoolId, teacherId])
+  @@index([studentId])
+  @@map("class_assignments")
+  @@schema("analytics_db")
+}
